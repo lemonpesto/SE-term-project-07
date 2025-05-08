@@ -7,19 +7,22 @@ public class Game {
     Player[] players;
     Board board = new Board();
     Player currentPlayer = new Player();
-    String[] GameStatus = new String[3]{"READY", "IN_PROGRESS", "FINISHED"};
+    String[] GameStatus = new String[]{"READY", "IN_PROGRESS", "FINISHED"};
     String currentGameStatus = GameStatus[0];
     RuleEngine checkRule = new RuleEngine();
 
     Scanner sc = new Scanner(System.in);
 
+
+
     //모나 윷 나왓을대 한번더 하는 기능 넣기
     //extra윷
-    void start(){
-        //게임 초기화
-        System.out.println("몇 명할건지 입력");
-        int num = sc.nextInt();
-        players = new Player[num];
+    void start(){//게임 초기화
+
+        currentGameStatus = GameStatus[0];
+
+        //config 부르기
+        //게임 시작 버튼 누르기
 
     }
 
@@ -38,6 +41,10 @@ public class Game {
         }
         //지금까지 currentPlayer를 다음 사람으로 바꿧고...(이 때 플레이어 배열의 순서가 플레이 순서로 생각함)
 
+
+    }
+
+    void extraStep(){//모, 윷, 상대말 잡기로 인한 추가 윷던지기
 
     }
 
