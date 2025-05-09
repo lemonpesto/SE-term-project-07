@@ -15,8 +15,6 @@ public class GameConfig{
     Game game;
 
     public GameConfig(){
-
-
         Setting();
         //입력값 검증 -> 잘못되었으면 다시 config setting
         while(!validate()){
@@ -25,9 +23,9 @@ public class GameConfig{
         }
 
         //게임 시작 버튼
-        System.out.println("게임 하시겠습니까?");
-        Scanner sc = new Scanner(System.in);
-        if(sc.nextInt() ==1) makeGame();        //자바 스윙에서 어케할지 모르니까 일단 1 입력받으면 한다고 침
+        System.out.println("게임 하시겠습니까?");   //스윙에서 '게임시작'버튼으로 대체.
+        Scanner sc = new Scanner(System.in);    //스윙에서 '게임시작'버튼을 누름.
+        if(sc.nextInt()==1) makeGame();         //버튼을 눌렀으면 makeGame을 실행.
 
         //게임 재시작 : game객체 삭제 및 재생성
 
@@ -71,7 +69,7 @@ public class GameConfig{
     }
 
     public void makeGame(){
-        game = new Game(this, playerNum, playerName, piecesNum,boardShape);
+        game = new Game(playerNum, playerName, piecesNum,boardShape);
     }
 
     public void restartGame(){

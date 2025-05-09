@@ -3,12 +3,10 @@ import config.GameConfig;
 public class Main {
     public static void main(String[] args) {
 
-        /*이걸 main에서 해줘야함.*/
         //config setting
-        boolean status = true;
-        while(status){
+        while(true){
             GameConfig gameConfig = new GameConfig();
-            if(!gameConfig.restart) status = false;
+            if(!gameConfig.restart) break;
         }
         System.out.println("겜 종료.");
     }

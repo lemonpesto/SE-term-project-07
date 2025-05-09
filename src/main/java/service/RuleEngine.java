@@ -44,4 +44,5 @@ public class RuleEngine{
         /*piece의 state를 for문으로 모두 체크해서 하는 것으로 수정하기*/
         else return false;
     }
+
 }
