@@ -2,7 +2,6 @@ package controller;
 
 import model.Game;
 import model.Piece;
-import model.Player;
 import model.ThrowResult;
 import service.MoveActionService;
 import service.RuleEngine;
@@ -12,7 +11,6 @@ import view.swing.GameBoardPanel;
 import view.swing.StatusPanel;
 
 import javax.swing.*;
-import java.util.List;
 
 public class GameController {
     private final Game game;
@@ -43,20 +41,12 @@ public class GameController {
         statusPanel.updateStatus(result);
 
         // simple: move first available piece
-        Piece piece = game.getPlayers().get(0).selectPiece(0);
+        Piece piece = game.getPlayers().get(0).selectPiece();
         moveService.movePiece(piece, result, game);
 
         boardPanel.repaint();
         if (game.isFinished()) {
-            List<Player> finished = game.getFinishedPlayers();
-            StringBuilder sb = new StringBuilder("게임 종료!\n");
-            for (int i = 0; i < finished.size(); i++) {
-                sb.append(i + 1)
-                        .append("위: ")
-                        .append(finished.get(i).getName())
-                        .append("\n");
-            }
-            JOptionPane.showMessageDialog(boardPanel, sb.toString());
+            JOptionPane.showMessageDialog(boardPanel, "게임 종료! 승리: " + game.getWinner().getName());
         }
     }
 }
