@@ -1,7 +1,6 @@
 package model;
 
 public class Piece {
-    //내 말에 의해 업혔는지/업었는지, 이동 칸 수???
     private int id; // 말의 고유 ID (각 플레이어마다 자동적으로 0->1->2 ... 방식으로 지정 => 다른 플레이어의 말이면 id값이 같을 수 있음)
     private Player owner; // 이 말을 소유하고 있는 플레이어
     private Cell position; // 말의 현재 위치
@@ -18,21 +17,11 @@ public class Piece {
     }
 
     // getter
-    public int getId() {
-        return id;
-    }
-    public Player getOwner() {
-        return owner;
-    }
-    public Cell getPosition() {
-        return position;
-    }
-    public PieceGroup getGroup() {
-        return group;
-    }
-    public PieceState getState(){
-        return state;
-    }
+    public int getId() { return id; }
+    public Player getOwner() { return owner; }
+    public Cell getPosition() { return position; }
+    public PieceGroup getGroup() { return group; }
+    public PieceState getState(){ return state; }
 
     // 말을 dest칸으로 옮김
     public void moveTo(Cell dest) {
@@ -44,7 +33,7 @@ public class Piece {
         // 빽도에 의해 다시 시작 Cell로 돌아온 경우는 어떻게 예외 처리를 할 건지...에 대한 고민
     }
 
-    // 이 말이 속할 그룹을 지정 (이 말이 업거나 업힐 때 사용)
+    // setter
     void setGroup(PieceGroup group) {
         this.group = group;
     }
