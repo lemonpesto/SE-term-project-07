@@ -39,10 +39,10 @@ public class Player {
     }
 
     // 플레이어의 말들 중에서 (내보내지 않은 상태의) 선택
-    public Piece selectPiece(int id) {
+    public Piece selectPiece() {
         for (Piece piece : pieces) {
             // 아직 들어오지 않은 말만 이동 가능
-            if((piece.getId() == id) && piece.getState() != PieceState.FINISHED){
+            if(piece.getState() != PieceState.FINISHED){
                 return piece;
             }
         }

@@ -94,7 +94,7 @@ public class Game {
 
         // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
         for (ThrowResult r : results) {
-            Piece piece = player.selectPiece(r, board);
+            Piece piece = player.selectPiece();
             moveActionService.movePiece(piece, r, this);
         }
     }
@@ -102,5 +102,24 @@ public class Game {
     // 플레이어 순위를 알기 위한 getter
     public List<Player> getFinishedPlayers(){
         return finishedPlayers;
+    }
+
+    //board getter
+    public Board getBoard(){
+        return board;
+    }
+
+    //players getter
+    public List<Player> getPlayers(){
+        return players;
+    }
+
+    public Boolean isFinished(){
+        if(players.size()==finishedPlayers.size()) return true;
+        else return false;
+    }
+
+    public Player getWinner(){
+        return finishedPlayers.get(0);
     }
 }

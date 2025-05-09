@@ -1,12 +1,16 @@
 package controller;
 
 import model.Game;
+import model.Piece;
+import model.ThrowResult;
 import service.MoveActionService;
 import service.RuleEngine;
 import service.YutThrowService;
 import view.swing.ControlPanel;
 import view.swing.GameBoardPanel;
 import view.swing.StatusPanel;
+
+import javax.swing.*;
 
 public class GameController {
     private final Game game;
@@ -37,7 +41,7 @@ public class GameController {
         statusPanel.updateStatus(result);
 
         // simple: move first available piece
-        Piece piece = game.getPlayers().get(0).selectPiece(0);
+        Piece piece = game.getPlayers().get(0).selectPiece();
         moveService.movePiece(piece, result, game);
 
         boardPanel.repaint();
