@@ -1,61 +1,107 @@
 package model;
 
-import java.util.Scanner;
+import java.util.*;
+import config.GameConfig;
+import service.YutThrowService;
+import service.MoveActionService;
 import service.RuleEngine;
 
 public class Game {
-    Player[] players;
-    Board board = new Board();
-    Player currentPlayer = new Player();
-    String[] GameStatus = new String[]{"READY", "IN_PROGRESS", "FINISHED"};
-    String currentGameStatus = GameStatus[0];
-    RuleEngine checkRule = new RuleEngine();
+    private final List<Player> players = new ArrayList<>();
+    private final List<Player> finishedPlayers = new ArrayList<>();
+    private GameStatus gameStatus;
+    private final BoardShape boardShape;
 
-    //Scanner sc = new Scanner(System.in);
+    // 보드 및 서비스
+    private final Board board;
+    private final YutThrowService yutService;
+    private final MoveActionService moveActionService;
+    private final RuleEngine ruleEngine;
 
-
-
-    //모나 윷 나왓을대 한번더 하는 기능 넣기
-    //extra윷
-    void start(){//게임 초기화
-
-        currentGameStatus = GameStatus[0];
-
-        //config 부르기
-        //게임 시작 버튼 누르기
-
+    private enum GameStatus {
+        READY,
+        IN_PROGRESS,
+        FINISHED
     }
 
-    void nextTurn(){
-        //다음 플레이어에게 턴 전환
-        if(currentPlayer == players[players.length -1]){
-            currentPlayer = players[0];
+    /**
+     * @param config 게임 설정 및 초기값
+     * @param playerNames 플레이어 이름 배열
+     */
+    public Game(GameConfig config, String[] playerNames) {
+        // 플레이어 생성
+        for (int i = 0; i < config.getNumPlayers(); i++) {
+            players.add(new Player(i, playerNames[i], config.getPiecesPerPlayer()));
         }
-        else{
-            int currentIndex = 0;   //초기값은 그냥 아무거나 설정한거..
-            for(int i=0;i< players.length;i++){     //플레이어 배열 중 현 플레이어의 인덱스값. (더 간단하게 할 수 있지 않을까?)
-                if(players[i]==currentPlayer) currentIndex = i;
+        this.boardShape = config.getBoardShape();
+        this.gameStatus = GameStatus.READY;
+
+        // 보드 및 서비스 초기화
+        this.board = new Board(boardShape);
+        this.ruleEngine = new RuleEngine();
+        this.yutService = new YutThrowService();
+        this.moveActionService = new moveActionService(ruleEngine);
+    }
+
+    /**
+     * 모든 플레이어가 말을 내보낼 때까지 게임을 진행합니다.
+     */
+    public void startGame() {
+        gameStatus = GameStatus.IN_PROGRESS;
+
+        while (gameStatus == GameStatus.IN_PROGRESS) {
+            for (Player current : players) {
+                if (current.getIsFinished()) continue;
+                playTurn(current);
+                if (current.getIsFinished()) {
+                    finishedPlayers.add(current);
+                }
             }
-
-            currentPlayer = players[currentIndex+1];
+            checkGameOver();
         }
-        //지금까지 currentPlayer를 다음 사람으로 바꿧고...(이 때 플레이어 배열의 순서가 플레이 순서로 생각함)
-
-
     }
 
-    void applyExtraTurn(){//모, 윷, 상대말 잡기로 인한 추가 윷던지기
+    /**
+     * 한 플레이어의 한 턴을 처리합니다.
+     */
+    public void playTurn(Player player) {
+        // 1) 윷 던지기를 모아두기 (Extra Turn 포함)
+        List<ThrowResult> results = new ArrayList<>();
+        ThrowResult result;
+        do {
+            result = yutService.throwRandom();
+            results.add(result);
+        } while (result.isExtraTurn());
 
-    }
-
-    Player checkVictory(){
-        //승리조건 확인 및 승자 반환
-        if(checkRule.applyVictoryCheck(currentPlayer)) { //이게 true면.
-            currentGameStatus = GameStatus[3];
-            return currentPlayer;
-
+        // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
+        for (ThrowResult r : results) {
+            Piece piece = player.selectPiece(r, board);
+            moveActionService.movePiece(piece, r, this);
         }
-        else return null;
     }
 
+    /**
+     * 모든 플레이어가 끝났는지 검사하여 게임 상태를 FINISHED로 변경합니다.
+     */
+    private void checkGameOver() {
+        for (Player p : players) {
+            if (!p.getIsFinished()) return;
+        }
+        gameStatus = GameStatus.FINISHED;
+    }
+
+    /**
+     * 게임 종료 순서(플레이어 순위) 반환
+     */
+    public List<Player> getFinishedPlayers() {
+        return Collections.unmodifiableList(finishedPlayers);
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public GameStatus getGameStatus() {
+        return gameStatus;
+    }
 }
