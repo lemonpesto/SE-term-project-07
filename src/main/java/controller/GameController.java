@@ -1,8 +1,6 @@
 package controller;
 
-import model.Game;
-import model.Piece;
-import model.ThrowResult;
+import model.*;
 import service.MoveActionService;
 import service.RuleEngine;
 import service.YutThrowService;
@@ -21,6 +19,8 @@ public class GameController {
     private final MoveActionService moveService;
     private final RuleEngine ruleEngine;
 
+    private Board board;
+
     public GameController(Game game, GameBoardPanel boardPanel, ControlPanel controlPanel, StatusPanel statusPanel) {
         this.game = game;
         this.boardPanel = boardPanel;
@@ -32,6 +32,16 @@ public class GameController {
 
         controlPanel.setRandomListener(e -> onThrow(null));
         controlPanel.setDesignatedListener(e -> onThrow(controlPanel.getSelectedResult()));
+
+//
+//        board = game.getBoard();
+//        Cell start = board.getStartCell();
+//        for (Player p : game.getPlayers()) {
+//            for (Piece piece : p.getPieces()) {
+//                piece.moveTo(start); // 꼭 있어야 함!
+//            }
+//        }
+
     }
 
     private void onThrow(ThrowResult designated) {
@@ -51,5 +61,10 @@ public class GameController {
             JOptionPane.showMessageDialog(boardPanel, "게임 종료! 승리: " + game.getWinner().getName());
         }
 
+
+    }
+
+    public Board getBoard(){
+        return game.getBoard();
     }
 }

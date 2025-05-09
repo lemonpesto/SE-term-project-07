@@ -13,6 +13,10 @@ public class SwingGameView {
     private final StatusPanel statusPanel;
     private final YutThrowService throwService;
 
+    private final GameBoardPanel boardPanel;
+    private final GameController controller = null;
+
+
 
     public SwingGameView() {
         this.throwService = new YutThrowService();
@@ -32,6 +36,11 @@ public class SwingGameView {
         frame.add(statusPanel, BorderLayout.CENTER);
         frame.setSize(500, 250);
         frame.setLocationRelativeTo(null);
+
+        boardPanel = new GameBoardPanel(controller.getBoard());
+        boardPanel.setPieceSelectionListener(piece -> {
+            System.out.println("선택된 말: " + piece.getOwner().getName() + " - 말 ID: " + piece.getId());
+        });
     }
 
     /** 랜덤 윷 던지기 */
