@@ -1,9 +1,8 @@
 package model;
 
-import service.YutThrowService;
-
 import java.util.List;
 import java.util.ArrayList;
+
 
 public class Player {
     private int id; // 플레이어 고유 ID (유저가 설정하지 않고, 게임 시스템 내에서 auto increment 적용할 예정)
@@ -29,7 +28,7 @@ public class Player {
     // getter
     public int getId() { return id; }
     public String getName() { return name; }
-    public List<Piece> getPieces() { return pieces; }
+    public java.util.List<Piece> getPieces() { return pieces; }
     public List<PieceGroup> getPieceGroups() { return pieceGroups; }
     public boolean getIsFinished() { return isFinished; }
 

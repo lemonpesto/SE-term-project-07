@@ -3,39 +3,54 @@ package view.swing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+
+import model.Piece;
 import model.ThrowResult;
 
 public class ControlPanel extends JPanel {
-    private final JButton randomButton;
-    private final JButton designatedButton;
-    private final JComboBox<ThrowResult> designatedCombo;
+    private final JComboBox<Integer> pieceCombo;
+    private final JButton randomBtn;
+    private final JComboBox<ThrowResult> throwCombo;
+    private final JButton designatedBtn;
 
     public ControlPanel() {
-        this.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        pieceCombo = new JComboBox<>();
+        randomBtn = new JButton("랜덤 던지기");
+        throwCombo = new JComboBox<>(ThrowResult.values());
+        designatedBtn = new JButton("지정 던지기");
 
-        // 랜덤 던지기 버튼
-        randomButton = new JButton("랜덤 윷 던지기");
-        this.add(randomButton);
-
-        // 지정 던지기 콤보박스 + 버튼
-        designatedCombo = new JComboBox<>(ThrowResult.values());
-        this.add(designatedCombo);
-        designatedButton = new JButton("지정 윷 던지기");
-        this.add(designatedButton);
+        setLayout(new FlowLayout(FlowLayout.LEFT));
+        add(new JLabel("말 선택:"));
+        add(pieceCombo);
+        add(randomBtn);
+        add(throwCombo);
+        add(designatedBtn);
     }
 
-    /** 랜덤 던지기 버튼 리스너 등록 */
-    public void setRandomListener(ActionListener listener) {
-        randomButton.addActionListener(listener);
+    public void setupPieceSelector(java.util.List<Piece> pieces) {
+        pieceCombo.removeAllItems();
+        for (Piece p : pieces) {
+            pieceCombo.addItem(p.getId());
+        }
     }
 
-    /** 지정 던지기 버튼 리스너 등록 */
-    public void setDesignatedListener(ActionListener listener) {
-        designatedButton.addActionListener(listener);
+    public int getSelectedPieceId() {
+        return (Integer) pieceCombo.getSelectedItem();
     }
 
-    /** 콤보박스에서 선택된 ThrowResult 반환 */
+    public void setRandomListener(ActionListener l) {
+        randomBtn.addActionListener(l);
+    }
+
+    public void setDesignatedListener(ActionListener l) {
+        designatedBtn.addActionListener(l);
+    }
+
+    public ThrowResult getSelectedThrow() {
+        return (ThrowResult) throwCombo.getSelectedItem();
+    }
+
     public ThrowResult getSelectedResult() {
-        return (ThrowResult) designatedCombo.getSelectedItem();
+        return getSelectedThrow();
     }
 }

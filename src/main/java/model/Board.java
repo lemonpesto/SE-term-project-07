@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +31,8 @@ public class Board {
         this.startCell = initBoard();
     }
 
-    public List<Cell> getCells() {
-        return cells;
-    }
+    public List<Cell> getCells() { return cells; }
+    public int getSides() { return sides; }
 
     /** 보드의 시작 셀 반환 */
     public Cell getStartCell() {
@@ -106,4 +106,6 @@ public class Board {
         /** 출발점 V0 반환 */
         return perimeter.get(0);
     }
+
+    public int getCellsPerEdge() { return cellsPerEdge;}
 }

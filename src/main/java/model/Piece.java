@@ -19,7 +19,7 @@ public class Piece {
     public Piece(int id, Player owner, Cell startPosition) {
         this.id = id;
         this.owner = owner;
-        this.position = null; // 말이 시작할 떄 시작점에 위치하는데, 이 시작점 칸을 구분할 수 있는 변수가 Cell 클래스에 있나여
+        this.position = startPosition; // 말이 시작할 떄 시작점에 위치하는데, 이 시작점 칸을 구분할 수 있는 변수가 Cell 클래스에 있나여
         this.group = null; // null로 해도 되나여
         this.state = PieceState.NOT_STARTED; // 말이 처음 생성될 때는 보드판으로 나가지 않은 상태
         this.path = new ArrayList<>();

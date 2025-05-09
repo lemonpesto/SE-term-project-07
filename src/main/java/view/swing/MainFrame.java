@@ -35,9 +35,7 @@ public class MainFrame extends JFrame {
         // 1) 설정 다이얼로그
         dialog = new DialogView(this);
         GameConfig config = dialog.showDialog();
-        if (config == null) {
-            System.exit(0);
-        }
+        if (config == null) System.exit(0);
 
         // 2) 모델 초기화
         String[] names = new String[config.getNumPlayers()];
@@ -52,6 +50,8 @@ public class MainFrame extends JFrame {
         statusPanel = new StatusPanel();
         boardPanel = new GameBoardPanel(game.getBoard());
 
+        controlPanel.setupPieceSelector(game.getPlayers().get(0).getPieces());
+
         add(controlPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
@@ -61,10 +61,7 @@ public class MainFrame extends JFrame {
 
         // 4) 컨트롤러 연결
         controller = new GameController(
-                game,
-                boardPanel,
-                controlPanel,
-                statusPanel
+                game, boardPanel, controlPanel, statusPanel
         );
     }
 

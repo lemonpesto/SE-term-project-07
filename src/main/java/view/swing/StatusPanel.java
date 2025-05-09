@@ -14,9 +14,6 @@ public class StatusPanel extends JPanel {
         this.add(resultLabel, BorderLayout.CENTER);
     }
 
-    /**
-     * 던진 결과와 추가 턴 여부를 화면에 표시합니다.
-     */
     public void updateStatus(ThrowResult result) {
         String text = String.format("결과: %s (%d칸) %s",
                 result.name(),
