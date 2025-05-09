@@ -1,12 +1,18 @@
 package controller;
 
 import model.Game;
+import model.Piece;
+import model.Player;
+import model.ThrowResult;
 import service.MoveActionService;
 import service.RuleEngine;
 import service.YutThrowService;
 import view.swing.ControlPanel;
 import view.swing.GameBoardPanel;
 import view.swing.StatusPanel;
+
+import javax.swing.*;
+import java.util.List;
 
 public class GameController {
     private final Game game;
@@ -42,7 +48,15 @@ public class GameController {
 
         boardPanel.repaint();
         if (game.isFinished()) {
-            JOptionPane.showMessageDialog(boardPanel, "게임 종료! 승리: " + game.getWinner().getName());
+            List<Player> finished = game.getFinishedPlayers();
+            StringBuilder sb = new StringBuilder("게임 종료!\n");
+            for (int i = 0; i < finished.size(); i++) {
+                sb.append(i + 1)
+                        .append("위: ")
+                        .append(finished.get(i).getName())
+                        .append("\n");
+            }
+            JOptionPane.showMessageDialog(boardPanel, sb.toString());
         }
     }
 }

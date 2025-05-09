@@ -43,6 +43,10 @@ public class Game {
         this.gameStatus = GameStatus.READY; // 게임이 처음 만들어졌을 때는 READY 상태
     }
 
+    // Getter
+    public List<Player> getPlayers() { return players; }
+    public Board getBoard() { return board;}
+
     // 현재 게임을 시작하여 모든 플레이어가 모든 말을 내보낼 때까지 실행 (즉, 게임 한 판을 실행)
     public void startGame(){
         gameStatus = GameStatus.IN_PROGRESS; // 게임 중 상태로 변환
@@ -94,7 +98,7 @@ public class Game {
 
         // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
         for (ThrowResult r : results) {
-            Piece piece = player.selectPiece(r, board);
+            Piece piece = player.selectPiece(id);
             moveActionService.movePiece(piece, r, this);
         }
     }
@@ -102,5 +106,9 @@ public class Game {
     // 플레이어 순위를 알기 위한 getter
     public List<Player> getFinishedPlayers(){
         return finishedPlayers;
+    }
+
+    public boolean isFinished(){
+        return gameStatus == GameStatus.FINISHED;
     }
 }
