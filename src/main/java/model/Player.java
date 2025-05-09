@@ -13,11 +13,12 @@ public class Player {
     private boolean isFinished; // 플레이어가 모든 말을 내보냈는지 여부 (0이면 게임 중, 1이면 플레이어의 모든 말이 도착하여 끝남)
 
     // 생성자 -> 게임 시작할 때 호출할 것 같음
-    public Player(int id, String name, int piecesNum) {
+    public Player(int id, String name, int piecesNum, ) {
         this.id = id;
         this.name = name;
         this.pieces = new ArrayList<>(piecesNum);
         this.pieceGroups = new ArrayList<>(piecesNum);
+        this.isFinished = false;
 
         // 유저가 설정한 개수만큼 말 생성
         for (int i = 0; i < piecesNum; i++) {
@@ -29,41 +30,35 @@ public class Player {
     public int getId() { return id; }
     public String getName() { return name; }
     public List<Piece> getPieces() { return pieces; }
+    public List<PieceGroup> getPieceGroups() { return pieceGroups; }
+    public boolean getIsFinished() { return isFinished; }
 
-    // 랜덤 윷 던지기
-    public YutThrowService throwYut() {
-        YutThrowService throwResult = new YutThrowService();
-        throwResult.throwYut();
-        return throwResult;
+    // setter
+    public void setFinished(boolean isFinished) {
+        this.isFinished = isFinished;
     }
 
-    // 지정 윷 던지기 (게임 시스템 상에서 유저가 도개걸윷모빽도 중 누른 버튼 정보를 추출했다고 가정)
-    public YutThrowService throwYut(ThrowResult preset) {
-        YutThrowService throwResult = new YutThrowService();
-        throwResult.setResult(preset);
-        return throwResult;
-    }
-
-    // 어떤 말을 움직일지 선택 (실제로 움직이는 것은 movePiece()에서)
-    public Piece selectPiece() {
+    // 플레이어의 말들 중에서 (내보내지 않은 상태의) 선택
+    public Piece selectPiece(int id) {
         for (Piece piece : pieces) {
             // 아직 들어오지 않은 말만 이동 가능
-            if(piece.getState() == PieceState.NOT_STARTED || piece.getState() == PieceState.ON_BOARD){
-                // 의문점 1 : 이 말을 선택했다는 것을 어떻게 아는지
-                if(){
+            if((piece.getId() == id) && piece.getState() != PieceState.FINISHED){
                     return piece;
-                }
             }
         }
+        return null;
     }
 
-    // 선택한 말(piece)을 원하는 곳(dest)으로 이동
-    public void movePiece(Piece piece, Cell dest) {
-        for (Piece curPiece : pieces){
-            // 이동하려는 말의 ID와 현재 순회 중인 말의 ID가 같다면 이동
-            if(piece.getId() == curPiece.getId()){
-                piece.moveTo(dest);
+    // 플레이어가 모든 말을 내보냈는지 확인하고, 그렇다면 isFinished를 true로 설정
+    public void isFinished(){
+        for(Piece piece : pieces){
+            // 플레이어가 가진 말의 상태가 하나라도 FINISHED 상태가 아니라면 isFinished를 false로 설정하고 함수 종료
+            if(!(piece.getState() == PieceState.FINISHED)){
+                setFinished(false);
+                return;
             }
         }
+        // 플레이어가 가진 모든 말의 상태가 FINISHED인 경우 isFinished를 true로 설정
+        setFinished(true);
     }
 }
