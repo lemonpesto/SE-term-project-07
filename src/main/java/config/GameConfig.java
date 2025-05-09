@@ -10,9 +10,13 @@ public class GameConfig{
     int piecesNum; //플레이어의 말 개수
     BoardShape boardShape = null;
 
+    public boolean restart;
+
     Game game;
 
     public GameConfig(){
+
+
         Setting();
         //입력값 검증 -> 잘못되었으면 다시 config setting
         while(!validate()){
@@ -25,7 +29,10 @@ public class GameConfig{
         Scanner sc = new Scanner(System.in);
         if(sc.nextInt() ==1) makeGame();        //자바 스윙에서 어케할지 모르니까 일단 1 입력받으면 한다고 침
 
+        //게임 재시작 : game객체 삭제 및 재생성
+
     }
+
 
 
     public void Setting(){
@@ -53,8 +60,6 @@ public class GameConfig{
             default : break;
         }
 
-
-
         //보드판 설정
 
     }
@@ -66,6 +71,14 @@ public class GameConfig{
     }
 
     public void makeGame(){
-        game = new Game(playerNum, playerName, piecesNum,boardShape);
+        game = new Game(this, playerNum, playerName, piecesNum,boardShape);
+    }
+
+    public void restartGame(){
+        restart = true;
+    }
+
+    public void exitGame(){
+        restart = false;
     }
 }

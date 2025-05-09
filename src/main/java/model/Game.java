@@ -10,7 +10,7 @@ public class Game {
     BoardShape boardShape;
     Player currentPlayer = new Player();
     GameStatus gameStatus;
-    RuleEngine checkRule = new RuleEngine();
+    GameConfig config;
 
     //Scanner sc = new Scanner(System.in);
 
@@ -23,7 +23,8 @@ public class Game {
     //extra윷
 
     //생성자. 플레이어 정보(ID,이름,말 수) 설정 및 boardshape 저장.
-    public Game(int playerNum, String[] playerName, int piecesNum, BoardShape boardShape){
+    public Game(GameConfig config, int playerNum, String[] playerName, int piecesNum, BoardShape boardShape){
+        this.config = config;
 
         gameStatus = GameStatus.READY; // 나중에 생각해볼래말래볼래말래 봐야되긴해
 
@@ -36,23 +37,50 @@ public class Game {
         //boardshape설정
         this.boardShape = boardShape;
 
-        Start();   //실제 게임 동작
-        int select = End();      //게임 끝나고 다시할지말지 선택
-
-        if(select==1) {
-            //main함수한테 select 값 전해줘서 다시 실행시키기;; 이거 어케 구현가능함?ㅎ game->gameconfig->main뭐 이렇게 전달해야할 것 같은디
-        }
+        Execute();   //실제 게임 동작
     }
 
-    void Start(){ //게임 시작
+    void Execute(){ //게임 시작
         gameStatus = GameStatus.IN_PROGRESS
         //여기에서 첫번째 턴 할당.
         //이 안에서 다 진행하는 게 나을듯?
 
-        //결과 나오면 반환하고 -> Game생성자 쪽에서 다시 실행또 할지 말지 하는게 나을듯
+        while(gameStatus!=GameStatus.FINISHED) {
+            currentPlayer = players.get(0);
+            playTurn();
+        }
+        /*
+            --playTurn--
+            윷던지기 버튼 클릭
+            윷 랜덤 결과 생성
+            결과 표시하고
+                한번 더 해야되면 한번더 하고
+            말 선택 활성화 하고
+
+            *여러 번 던졌으면 윷 결과 가지고 이거 여러번 반복.
+            말 선택 하고
+            목표 칸 계산하고
+            말 이동시키고 (그리고 보드 갱신하고?)
+
+            --TurnCheck--
+                이동시킨 후에, 말 여러개가 같은 칸인지 검사하고
+                여러개가 같은 칸 맞으면 그룹으로 만들고(업고)
+                그룹이 된 말들을 담 턴부터 같이 이동하고
+
+                이동시킨 후에, 상대방 말이랑 같은 칸인지 검사하고
+                맞으면 상대 말 제거하고
+                상대 말 시작위치로 돌려보내고
+                보드 갱신해서 변화 반영하고
+
+                플레이어의 모든 말이 도착했는지 검사하고
+                다 도착한 거 있으면 그 사람을 승자로 선언하고
+                게임 종료 화면 표시하고, 재시작|종료 옵션 제공하기.
+
+        */
+
     }
 
-    int End(){
+    void End(){
         if(gameStatus != GameStatus.FINISHED) System.exit(1); //그냥 현 상태 finished맞는지 함 더 체크하는 거.
                                                                         //만약....finished도 아닌데 왓다면...걍 강종.
         while(true){
@@ -60,13 +88,31 @@ public class Game {
             Scanner sc = new Scanner(System.in);
             int select = sc.nextInt();
 
-            if(select == 0) System.exit(0);
-            else if(select==1) {
-                return 1;
-            }
+            if(select == 0) config.exitGame();
+            else if(select==1) config.restartGame();
             else {
                 System.out.println("\n다시 입력하세요.");
             }
+        }
+    }
+
+    void playTurn(){
+        //turn실행.
+        //말이 도착한 cell필요.
+        TurnCheck(cell);
+        nextTurn();
+    }
+    void TurnCheck(){   //각 턴마다 업기, 잡기, 승리가능한지 조건을 체크하고 -> 가능하면 수행.
+        if(RuleEngine.applyGrouping(cell)){ //업기 조건 체크
+            //업기
+        }
+        if(RuleEngine.applyCapture(cell)){  //잡기 조건 체크
+            //잡기
+        }
+        if(RuleEngine.applyVictoryCheck(currentPlayer)){    //현 플레이어가 승자인지 확인 -> 맞으면 현 플레이어 반환하고?, 게임상태 finished로 바꾸고, end()호출.
+            Player victoryPlayer = currentPlayer;   //승자 플레이어를 화면에 표시해야 해서 일단 쓰일까 싶어서 만들어둠
+            gameStatus = GameStatus.FINISHED;
+            End();
         }
     }
 
@@ -92,14 +138,5 @@ public class Game {
 
     }
 
-    Player checkVictory(){
-        //승리조건 확인 및 승자 반환
-        if(checkRule.applyVictoryCheck(currentPlayer)) { //이게 true면.
-            currentGameStatus = GameStatus[3];
-            return currentPlayer;
-
-        }
-        else return null;
-    }
 
 }

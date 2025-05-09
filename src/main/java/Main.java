@@ -5,11 +5,11 @@ public class Main {
 
         /*이걸 main에서 해줘야함.*/
         //config setting
-        GameConfig gameConfig = new GameConfig();
-
-
-
-
-
+        boolean status = true;
+        while(status){
+            GameConfig gameConfig = new GameConfig();
+            if(!gameConfig.restart) status = false;
+        }
+        System.out.println("겜 종료.");
     }
 }
