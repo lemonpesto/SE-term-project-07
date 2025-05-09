@@ -6,6 +6,9 @@ import service.YutThrowService;
 
 import java.util.*;
 
+/**
+ * 게임 한 판을 실행하는 클래스
+ */
 public class Game {
     private List<Player> players = new ArrayList<>(); // 현재 게임에 참여하는 플레이어들
     private List<Player> finishedPlayers = new ArrayList<>(); // 말을 모두 내보내서 윷을 던질 수 없는 플레이어들 (먼저 끝날수록 먼저 추가되므로 순위 파악에 활용 가능)
@@ -23,19 +26,21 @@ public class Game {
         IN_PROGRESS, // 플레이어가 윷을 던지고 말을 옮기는 실제 게임 중인 상태
         FINISHED // 모든 플레이어가 말을 내보내서 게임이 종료된 상태
     }
-    BoardShape boardShape;
-
 
     //생성자 : 플레이어/말/보드 모양을 받아와서 해당 게임을 초기화
     public Game(int playerNum, String[] playerName, int piecesNum, BoardShape boardShape){
+        this.boardShape = boardShape;
+        this.board = new Board(boardShape);
+        this.ruleEngine = new RuleEngine();
+        this.yutThrowService = new YutThrowService();
+        this.moveActionService = new MoveActionService(ruleEngine);
+
         // 플레이어 생성
         for(int i=0; i<playerNum; i++){
-            this.players.add(new Player(i, playerName[i], piecesNum));
+            this.players.add(new Player(i, playerName[i], piecesNum, board.getStartCell()));
         }
-        // 게임이 처음 만들어졌을 때는 READY 상태
-        this.gameStatus = GameStatus.READY;
-        // 게임의 보드판 모양 설정
-        this.boardShape = boardShape;
+
+        this.gameStatus = GameStatus.READY; // 게임이 처음 만들어졌을 때는 READY 상태
     }
 
     // 현재 게임을 시작하여 모든 플레이어가 모든 말을 내보낼 때까지 실행 (즉, 게임 한 판을 실행)
@@ -61,12 +66,12 @@ public class Game {
                 }
             }
             // 모든 플레이어가 한 턴씩 실행하고 나면 모든 플레이어가 모든 말을 내보냈는지 확인 => 게임을 종료할 조건인지 확인
-            isGameOver();
+            checkGameOver();
         }
     }
 
     // 게임을 종료할 상태라면 gameStatus를 FINISHED로 바꿈 (모든 플레이어를 검사하여 모든 말을 내보냈는지 확인)
-    public void isGameOver(){
+    public void checkGameOver(){
         for(Player player : players){
             // 한 플레이어라도 끝난 상태가 아니라면 gameStatus를 바꾸지 않고 함수를 종료함
             if(!player.getIsFinished()){

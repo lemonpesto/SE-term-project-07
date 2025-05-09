@@ -13,7 +13,7 @@ public class Player {
     private boolean isFinished; // 플레이어가 모든 말을 내보냈는지 여부 (0이면 게임 중, 1이면 플레이어의 모든 말이 도착하여 끝남)
 
     // 생성자 -> 게임 시작할 때 호출할 것 같음
-    public Player(int id, String name, int piecesNum, ) {
+    public Player(int id, String name, int piecesNum, Cell startCell) {
         this.id = id;
         this.name = name;
         this.pieces = new ArrayList<>(piecesNum);
@@ -22,7 +22,7 @@ public class Player {
 
         // 유저가 설정한 개수만큼 말 생성
         for (int i = 0; i < piecesNum; i++) {
-            pieces.add(new Piece(i, this));
+            pieces.add(new Piece(i, this, startCell));
         }
     }
 
