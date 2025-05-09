@@ -34,6 +34,15 @@ public class Piece {
     public PieceState getState(){ return state; }
     public List<Cell> getPath() { return new ArrayList<>(path); }
 
+    // setter
+    void setGroup(PieceGroup group) {
+        this.group = group;
+    }
+
+    // 이 말을 pieceGroup에 추가 (이 말이 같은 플레이어의 그룹말에 있는 칸으로 갔을 때 업는 기능)
+    public void joinGroup(PieceGroup pieceGroup) {
+        pieceGroup.grouping(this);
+    }
 
     // 말을 dest칸으로 옮김
     public void moveTo(Cell dest) {

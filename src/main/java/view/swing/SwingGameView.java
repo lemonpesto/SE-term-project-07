@@ -13,7 +13,6 @@ public class SwingGameView {
     private final YutThrowService throwService;
 
     public SwingGameView() {
-        // 서비스 인스턴스 생성 (Random 주입용 생성자 사용 가능)
         this.throwService = new YutThrowService();
 
         frame = new JFrame("윷 던지기 데모");
@@ -23,24 +22,30 @@ public class SwingGameView {
         controlPanel = new ControlPanel();
         statusPanel = new StatusPanel();
 
-        // 컨트롤 패널에 버튼 리스너 등록
-        controlPanel.setThrowListener(e -> onThrowYut());
+        // 이벤트 등록
+        controlPanel.setRandomListener(e -> onRandomThrow());
+        controlPanel.setDesignatedListener(e -> onDesignatedThrow());
 
         frame.add(controlPanel, BorderLayout.NORTH);
         frame.add(statusPanel, BorderLayout.CENTER);
-        frame.setSize(400, 200);
+        frame.setSize(500, 250);
         frame.setLocationRelativeTo(null);
     }
 
-    private void onThrowYut() {
-        // 던지기 실행 후 결과 화면 업데이트
-        ThrowResult result = throwService.throwYut();
+    /** 랜덤 윷 던지기 */
+    private void onRandomThrow() {
+        ThrowResult result = throwService.throwRandom();
         statusPanel.updateStatus(result);
     }
 
-    /**
-     * 화면을 보이게 합니다.
-     */
+    /** 지정 윷 던지기 */
+    private void onDesignatedThrow() {
+        ThrowResult selected = controlPanel.getSelectedResult();
+        ThrowResult result = throwService.throwDesignated(selected);
+        statusPanel.updateStatus(result);
+    }
+
+    /** 화면 표시 */
     public void show() {
         SwingUtilities.invokeLater(() -> frame.setVisible(true));
     }
