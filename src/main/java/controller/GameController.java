@@ -35,9 +35,11 @@ public class GameController {
     }
 
     private void onThrow(ThrowResult designated) {
-        ThrowResult result = (designated == null)
-                ? throwService.throwRandom()
-                : throwService.throwDesignated(designated);
+        ThrowResult result = null;
+        if(designated==null) result = throwService.throwRandom();
+//        ThrowResult result = (designated == null)
+//                ? throwService.throwRandom()
+//                : throwService.throwDesignated(designated);
         statusPanel.updateStatus(result);
 
         // simple: move first available piece
@@ -48,5 +50,6 @@ public class GameController {
         if (game.isFinished()) {
             JOptionPane.showMessageDialog(boardPanel, "게임 종료! 승리: " + game.getWinner().getName());
         }
+
     }
 }

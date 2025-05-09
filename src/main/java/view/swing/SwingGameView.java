@@ -1,5 +1,6 @@
 package view.swing;
 
+import controller.GameController;
 import service.YutThrowService;
 import model.ThrowResult;
 
@@ -11,6 +12,7 @@ public class SwingGameView {
     private final ControlPanel controlPanel;
     private final StatusPanel statusPanel;
     private final YutThrowService throwService;
+
 
     public SwingGameView() {
         this.throwService = new YutThrowService();
