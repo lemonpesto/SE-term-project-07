@@ -1,17 +1,30 @@
 package model;
 
+import service.MoveActionService;
+import service.RuleEngine;
+import service.YutThrowService;
+
 import java.util.*;
 
 public class Game {
     private List<Player> players = new ArrayList<>(); // 현재 게임에 참여하는 플레이어들
     private List<Player> finishedPlayers = new ArrayList<>(); // 말을 모두 내보내서 윷을 던질 수 없는 플레이어들 (먼저 끝날수록 먼저 추가되므로 순위 파악에 활용 가능)
     private GameStatus gameStatus; // 현재 게임 상태
+    private final BoardShape boardShape;
+
+    // 보드 및 서비스
+    private final Board board;
+    private final YutThrowService yutThrowService;
+    private final MoveActionService moveActionService;
+    private final RuleEngine ruleEngine;
+
     private enum GameStatus{
         READY, // 게임 준비 중인 상태 (플레이어 수, 말 수, 보드판 모양 등 설정)
         IN_PROGRESS, // 플레이어가 윷을 던지고 말을 옮기는 실제 게임 중인 상태
         FINISHED // 모든 플레이어가 말을 내보내서 게임이 종료된 상태
     }
     BoardShape boardShape;
+
 
     //생성자 : 플레이어/말/보드 모양을 받아와서 해당 게임을 초기화
     public Game(int playerNum, String[] playerName, int piecesNum, BoardShape boardShape){
@@ -65,11 +78,20 @@ public class Game {
     }
 
     // 한 플레이어가 한 턴을 실행 (윷을 던지고, 말을 옮김)
-    public void playTurn(Player player){
-        do{
-            //player.throwYut().; // 윷을 던짐
-        } while();
-        // 말 선택하고 옮기기
+    public void playTurn(Player player) {
+        // 1) 윷 던지기를 모아두기 (Extra Turn 포함)
+        List<ThrowResult> results = new ArrayList<>();
+        ThrowResult result;
+        do {
+            result = YutThrowService.throwRandom();
+            results.add(result);
+        } while (result.isExtraTurn());
+
+        // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
+        for (ThrowResult r : results) {
+            Piece piece = player.selectPiece(r, board);
+            moveActionService.movePiece(piece, r, this);
+        }
     }
 
     // 플레이어 순위를 알기 위한 getter

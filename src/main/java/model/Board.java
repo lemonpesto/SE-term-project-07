@@ -15,7 +15,7 @@ public class Board {
     private final int cellsToCenter = 2;// 꼭짓점과 중앙을 연결하는 일반 셀 수
 
     private final List<Cell> cells = new ArrayList<>();
-    private final Cell finishCell;
+    private final Cell startCell;
     /**
      * @param shape 판 형태 (SQUARE, PENTAGON, HEXAGON)
      */
@@ -27,7 +27,7 @@ public class Board {
             case HEXAGON: this.sides = 6; break;
             default: this.sides = 4; break;
         }
-        this.finishCell = initBoard();
+        this.startCell = initBoard();
     }
 
     public List<Cell> getCells() {
@@ -35,8 +35,8 @@ public class Board {
     }
 
     /** 보드의 시작 셀 반환 */
-    public Cell getFinishCell() {
-        return finishCell;
+    public Cell getStartCell() {
+        return startCell;
     }
 
     /**
