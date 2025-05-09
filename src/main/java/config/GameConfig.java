@@ -1,48 +1,71 @@
 package config;
 
 import java.util.Scanner;
-import model.Player;
-
-public enum BoardShape{
-    SQUARE,
-    PENTAGON,
-    HEXAGON
-}
+import model.BoardShape;
+import model.Game;
 
 public class GameConfig{
     int playerNum;
+    String[] playerName;
     int piecesNum; //플레이어의 말 개수
-    BoardShape currentBoardShape = new BoardShape;
-    //BoardShape[] boardShape = new BoardShape[]{SQUARE, PENTAGON, HEXAGON};
+    BoardShape boardShape = null;
 
-    Boolean validate(){
-        //설정값 검증
-        //머 어케 검증;;;?????
+    Game game;
+
+    public GameConfig(){
+        Setting();
+        //입력값 검증 -> 잘못되었으면 다시 config setting
+        while(!validate()){
+            System.out.println("입력값이 잘못되었습니다. 다시 입력해주세요.");
+            Setting();
+        }
+
+        //게임 시작 버튼
+        System.out.println("게임 하시겠습니까?");
+        Scanner sc = new Scanner(System.in);
+        if(sc.nextInt() ==1) makeGame();        //자바 스윙에서 어케할지 모르니까 일단 1 입력받으면 한다고 침
+
     }
 
-    void Setting(){
+
+    public void Setting(){
         Scanner sc = new Scanner(System.in);
 
         //인원, 말 수, 보드모양 입력
         System.out.println("몇 명할건지 선택(2~4명)");
         playerNum = sc.nextInt(); //이거 자바 스윙에서 버튼 선택하는 머 그렇게??해야되남?
 
+        playerName = new String[playerNum];
+        for(int i=0;i<playerNum;i++){
+            System.out.println((i+1)+"번째 player의 이름을 입력 : ");
+            playerName[i] = sc.next();
+        }
+
         System.out.println("인당 말 몇개 가질것? (2~5개)");
         piecesNum = sc.nextInt();
 
-        System.out.println("보드판 선택 : 사각형, 오각형, 육각형");
-        String temp = sc.next();
-        /// /어케적어야하지
-
-        //플레이어 정보 설정
-        Player[] players = new Player[playerNum];
-        for(int i=0; i<playerNum; i++){ //각 플레이어 생성
-            System.out.println((i+1)+"번째 player 이름 : ");    //사용자에게는 1번째, 2번째..지만 우리에겐 0번째, 1번째..
-            String name = sc.next();
-            players[i] = new Player(i, name, piecesNum);
+        System.out.println("보드판 선택 : 사각형(1), 오각형(2), 육각형(3)");
+        int temp = sc.nextInt();
+        switch (temp){
+            case 1 : boardShape = BoardShape.SQUARE; break;
+            case 2 : boardShape = BoardShape.PENTAGON; break;
+            case 3 : boardShape = BoardShape.HEXAGON; break;
+            default : break;
         }
+
+
 
         //보드판 설정
 
+    }
+
+    public Boolean validate(){
+        //설정값 검증. 플레이어 수, 말 수, 보드모양 모두 값이 올바르면 true.
+        if(2<=playerNum<=4 && 2<=piecesNum<=5 && boardShape!=null) return true;
+        else return false;
+    }
+
+    public void makeGame(){
+        game = new Game(playerNum, playerName, piecesNum,boardShape);
     }
 }
