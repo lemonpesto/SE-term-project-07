@@ -11,7 +11,7 @@ public class Game {
     String currentGameStatus = GameStatus[0];
     RuleEngine checkRule = new RuleEngine();
 
-    Scanner sc = new Scanner(System.in);
+    //Scanner sc = new Scanner(System.in);
 
 
 
@@ -44,7 +44,7 @@ public class Game {
 
     }
 
-    void extraStep(){//모, 윷, 상대말 잡기로 인한 추가 윷던지기
+    void applyExtraTurn(){//모, 윷, 상대말 잡기로 인한 추가 윷던지기
 
     }
 

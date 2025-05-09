@@ -9,7 +9,7 @@ public class RuleEngine{
         //첫번째 말이랑 비교하기. 첫번째 말이랑 비교해서 모두 같으면 업기인거고..첫번째 말이랑 다른 거 있으면 잡는거고..
         //(서로 다른 말이 있다면, 그 여부만 체크해주는 거. 어떤 말이 어떤 말을 잡을지는 applyCapture에서 결정
         for(int i=1;i<cell.occupants.length; i++){
-            if(cell.occupants[0] != cell.occupants[i].owner) return false;
+            if(cell.occupants[0].owner != cell.occupants[i].owner) return false;
         }
         return true;
     }
@@ -41,6 +41,7 @@ public class RuleEngine{
         if(currentPlayer.pieces.length == 0){ //현 플레이어의 말 개수가 0개면 (pieces에 다긴 말이 현재 플레이어에게 남은 말 개수라고 가정함)
             return true; //승리를 반환. true가 승리, false는 아직 승리 아닌 걸로 가정.
         }
+        /*piece의 state를 for문으로 모두 체크해서 하는 것으로 수정하기*/
         else return false;
     }
 }
