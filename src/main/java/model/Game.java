@@ -95,6 +95,7 @@ public class Game {
         // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
         for (ThrowResult r : results) {
             Piece piece = player.selectPiece();
+            if(piece.getState()==PieceState.NOT_STARTED) {piece.setStateOnBoard();}
             moveActionService.movePiece(piece, r);
         }
     }
