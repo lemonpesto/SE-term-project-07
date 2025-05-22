@@ -25,6 +25,9 @@ public class PieceGroup {
         pieceGroup.clear();
     }
 
+
+    //나린-아직 약간스 이해안됨. group을 piece에서만 접근가능한 것 같은데, 각 피스별로 movegroup시행하면 group한에 여러 피르가 들어있을 땐,
+        //한 피스만 실행되어야 함. group으로 붂여있을 땐 한 피스만 이 movegroup메소드를 쓸 수 잇게해야.. group안에 head인 피스를 정해둔다거나..
     // 그룹에 있는 모든 말들을 dest Cell로 이동
     public void moveGroup(Cell dest) {
         if (pieceGroup.isEmpty()) {
