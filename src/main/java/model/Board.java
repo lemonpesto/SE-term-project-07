@@ -94,6 +94,11 @@ public class Board {
         Cell vFinal = perimeter.get((sides - 1) * (cellsPerEdge + 1)); // 마지막 꼭짓점 cell
         Cell df_0 = new Cell("D" + (sides - 1) + "_0");
         Cell df_1 = new Cell("D" + (sides - 1) + "_1");
+        cells.add(df_0);
+        cells.add(df_1);
+        cellMap.put(df_0.getId(), df_0);
+        cellMap.put(df_1.getId(), df_1);
+
         center.addNextCell(df_0);
         df_0.addNextCell(df_1);
         df_1.addNextCell(vFinal);
@@ -102,6 +107,11 @@ public class Board {
         Cell vStart = perimeter.get(0); // 출발점
         Cell d0_0 = new Cell("D0_0");
         Cell d0_1 = new Cell("D0_1");
+        cells.add(d0_0);
+        cells.add(d0_1);
+        cellMap.put(d0_0.getId(), d0_0);
+        cellMap.put(d0_1.getId(), d0_1);
+
         center.addNextCell(d0_0);    // C --> D0_0
         d0_0.addNextCell(d0_1);      // D0_0 --> D0_1
         d0_1.addNextCell(vStart);    // D0_1 --> V0
