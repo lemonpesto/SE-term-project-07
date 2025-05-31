@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         // (1) 모델 생성
         String[] names = {"Alice", "Bob", "Charlie"};
-        Game game = new Game(3, names, 2, BoardShape.SQUARE);
+        Game game = new Game(3, names, 4, BoardShape.SQUARE);
 
         // (2) 뷰 선택: Swing, 또는 다른 UI 툴킷
         // 예를 들어, 실행 시 파라미터나 환경변수에 따라 결정할 수 있다.

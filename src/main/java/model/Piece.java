@@ -41,9 +41,14 @@ public class Piece {
 
     // --- Setter --- //
 
-    void setGroup(PieceGroup group) {
+    public void setGroup(PieceGroup group) {
         this.group = group;
     }
+    public void setState(PieceState state) {
+        this.state = state;
+    }
+
+    // --- Helper --- //
 
     // 이 말을 pieceGroup에 추가 (이 말이 같은 플레이어의 그룹말에 있는 칸으로 갔을 때 업는 기능)
     public void joinGroup(PieceGroup pieceGroup) {
@@ -56,6 +61,10 @@ public class Piece {
         dest.addPiece(this);                // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
         this.position = dest;               // 말의 위치를 dest Cell로 변경
         this.path.add(dest);                // 경로 기록
+        if(dest.isStartCell() && state == PieceState.NOT_STARTED){ // 말 잡힌 경우
+            path.clear();
+            path.add(dest);
+        }
         // 말이 한 바퀴를 돌아 시작 Cell에 도착했을 때 말의 상태를 바꾸는 로직을 설계 중이었는데 시작 Cell을 어떻게 인식하느냐...에 대한 문제
         // 빽도에 의해 다시 시작 Cell로 돌아온 경우는 어떻게 예외 처리를 할 건지...에 대한 고민
     }

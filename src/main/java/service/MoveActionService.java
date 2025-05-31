@@ -2,6 +2,7 @@ package service;
 
 import model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -46,7 +47,7 @@ public class MoveActionService {
         group.moveGroupTo(target);
 
         // 룰 적용
-        applyRules(group.getOwner(), target, game);
+        applyRules(group, target, game);
 
         // 5) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
 //        if (group.getOwner().hasAllPiecesFinished()) {
@@ -72,10 +73,10 @@ public class MoveActionService {
     }
 
     /** 이동 후 적용할 룰들을 분리된 메서드로 구현합니다. */
-    private void applyRules(Player player, Cell cell, Game game) {
+    private void applyRules(PieceGroup movingGroup, Cell cell, Game game) {
         // 말 업기
         if (ruleEngine.applyGrouping(cell)) {
-            PieceGroup group = new PieceGroup(player);
+            PieceGroup group = new PieceGroup(movingGroup.getOwner());
             for (Piece p : cell.getOccupants()) {
                 group.grouping(p);
             }
@@ -83,6 +84,23 @@ public class MoveActionService {
         // 상대 말 잡기
         if (ruleEngine.applyCapture(cell)) {
             // capture 처리 로직 호출 (추가 구현 필요)
+            List<Piece> occupants = new ArrayList<>(cell.getOccupants());
+            Cell startCell = game.getBoard().getStartCell();
+
+            for (Piece occupant : occupants) {
+                Player owner = occupant.getOwner();
+                if (!owner.equals(movingGroup.getOwner())) {
+                    // 1) 속해 있던 그룹에서 제거
+                    PieceGroup ownerGroup = occupant.getGroup();
+                    if (ownerGroup != null) {
+                        ownerGroup.remove(occupant);
+                    }
+                    // 상대말: 상태 변경 후 출발 셀로 이동
+                    occupant.setState(PieceState.NOT_STARTED);
+                    occupant.moveTo(startCell);
+                }
+            }
+
         }
     }
 }

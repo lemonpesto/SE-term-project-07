@@ -55,6 +55,13 @@ public class PieceGroup {
         }
     }
 
+    // 그룹에서 piece 제거
+    public void remove(Piece piece) {
+        if (pieces.remove(piece)) {
+            piece.setGroup(null);
+        }
+    }
+
     // 그룹 해체 (1. 다른 유저의 말/그룹에 의해 이 그룹이 잡히거나 2. 도착하면 => 그룹 해체)
     // 그룹 자체를 없애는 건 게임 시스템 차원에서 관리해주는 거로 가정하겠음
     public void breakUp() {
