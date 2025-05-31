@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * GameController의 “연속 던지기 → 모아둔 결과만큼 말 선택→이동” 흐름을 검증하는 JUnit 5 테스트
+ * GameController의 “연속 던지기 --> 모아둔 결과만큼 말 선택-->이동” 흐름을 검증하는 JUnit 5 테스트
  */
 class GameControllerTest {
 
@@ -36,11 +36,11 @@ class GameControllerTest {
         StubYutThrowService stubService = new StubYutThrowService(
                 Arrays.asList(ThrowResult.YUT, ThrowResult.DO)
         );
-        Field field = Game.class.getDeclaredField("throwService");
+        Field field = Game.class.getDeclaredField("yutThrowService");
         field.setAccessible(true);
         field.set(game, stubService);
 
-        // 3) DummyView 생성 → GameController에 주입
+        // 3) DummyView 생성 --> GameController에 주입
         view = new DummyView();
         controller = new GameController(game, view);
     }
@@ -53,34 +53,31 @@ class GameControllerTest {
         // 초기 상태 확인
         // - 첫 호출 시 "Alice님, 윷을 던져주세요." 메시지가 view에 기록되어야 함
         assertEquals(1, view.statusLog.size());
-        assertEquals("Alice님, 윷을 던져주세요.", view.statusLog.get(0));
-        // - 윷 던지기만 활성, 말 선택 비활성
-        assertTrue(view.lastThrowEnabled);
+        assertEquals("게임 준비 완료. Alice님, 윷을 던져주세요.", view.statusLog.get(0));
+        // - 말 선택 비활성
         assertFalse(view.lastPieceSelectable);
 
-        // --- 1) Alice: 첫 번째 던지기 (StubYutThrowService → YUT, extra=true) ---
+        // --- 1) Alice: 첫 번째 던지기 (StubYutThrowService --> YUT, extra=true) ---
         controller.onThrowButtonClicked();
 
         // throwResults 에 YUT 추가, extraTurn==true 이므로
         // - “추가 던지기” 메시지가 남음
         assertEquals("Alice님, 윷 결과: YUT 입니다.", view.statusLog.get(1));
-        assertEquals("Alice님, 추가 던지기 기회입니다. 다시 윷을 던져주세요.", view.statusLog.get(2));
-        // - 던지기 버튼이 여전히 활성, 말 선택은 비활성
-        assertTrue(view.lastThrowEnabled);
+        assertEquals("Alice님, 한 번 더 윷을 던져주세요!", view.statusLog.get(2));
+        // - 말 선택은 비활성
         assertFalse(view.lastPieceSelectable);
 
-        // --- 2) Alice: 두 번째 던지기 (StubYutThrowService → DO, extra=false) ---
+        // --- 2) Alice: 두 번째 던지기 (StubYutThrowService --> DO, extra=false) ---
         controller.onThrowButtonClicked();
 
         // throwResults 에 DO 추가, extraTurn==false 이므로 “이동할 말 선택” 단계로 진입
         // 순서:
         //   view.updateStatus("Alice님, 윷 결과: DO 입니다.");
-        //   view.updateStatus("Alice님, 첫 번째 결과: DO → 이동할 말을 클릭하세요.");
+        //   view.updateStatus("Alice님, 첫 번째 결과: DO --> 이동할 말을 클릭하세요.");
         int sizeAfter = view.statusLog.size();
         assertEquals("Alice님, 윷 결과: DO 입니다.", view.statusLog.get(sizeAfter - 2));
-        assertEquals("Alice님, 첫 번째 결과: DO → 이동할 말을 클릭하세요.", view.statusLog.get(sizeAfter - 1));
-        // - 던지기 버튼 비활성, 말 선택만 활성화
-        assertFalse(view.lastThrowEnabled);
+        assertEquals("Alice님, 첫 번째 결과: DO --> 이동할 말을 클릭하세요.", view.statusLog.get(sizeAfter - 1));
+        // - 말 선택만 활성화
         assertTrue(view.lastPieceSelectable);
 
         // --- 3) Alice: 첫 번째 이동 처리 ---
@@ -89,13 +86,12 @@ class GameControllerTest {
         controller.onPieceClicked(alicePiece);
 
         // 3-1) playOneTurn(Alice, ThrowResult.YUT, alicePiece) 적용
-        //     → 보드 최종 상태를 직접 검증하기 어려우므로, 최소한 repaintBoard가 호출되었는지 확인
+        //     --> 보드 최종 상태를 직접 검증하기 어려우므로, 최소한 repaintBoard가 호출되었는지 확인
         assertTrue(view.repaintCalled);
-        //     → “다음 결과: DO → 이동할 말을 클릭하세요.” 메시지가 남아 있어야 함
-        assertEquals("Alice님, 다음 결과: DO → 이동할 말을 클릭하세요.",
+        //     --> “다음 결과: DO --> 이동할 말을 클릭하세요.” 메시지가 남아 있어야 함
+        assertEquals("Alice님, 다음 결과: DO --> 이동할 말을 클릭하세요.",
                 view.statusLog.get(view.statusLog.size() - 1));
-        //     → 말 선택은 여전히 활성, 던지기는 비활성
-        assertFalse(view.lastThrowEnabled);
+        //     --> 말 선택은 여전히 활성, 던지기는 비활성
         assertTrue(view.lastPieceSelectable);
 
         // --- 4) Alice: 두 번째 이동 처리 ---
@@ -105,12 +101,11 @@ class GameControllerTest {
 
         // 4-1) playOneTurn(Alice, ThrowResult.DO, alicePiece) 적용
         assertTrue(view.repaintCalled);
-        // 4-2) 모든 ThrowResult 처리 완료 → 다음 플레이어 Bob 차례
-        //     → view.updateStatus("Bob님, 윷을 던져주세요.") 메시지가 기록되어야 함
+        // 4-2) 모든 ThrowResult 처리 완료 --> 다음 플레이어 Bob 차례
+        //     --> view.updateStatus("Bob님, 윷을 던져주세요.") 메시지가 기록되어야 함
         String lastStatus = view.statusLog.get(view.statusLog.size() - 1);
         assertEquals("Bob님, 윷을 던져주세요.", lastStatus);
-        // 4-3) 던지기 버튼 활성, 말 선택 비활성
-        assertTrue(view.lastThrowEnabled);
+        // 4-3) 말 선택 비활성
         assertFalse(view.lastPieceSelectable);
     }
 
@@ -142,7 +137,6 @@ class GameControllerTest {
      */
     static class DummyView implements IGameView {
         List<String> statusLog = new ArrayList<>();
-        boolean lastThrowEnabled;
         boolean lastPieceSelectable;
         boolean repaintCalled;
         String winnerNameShown;

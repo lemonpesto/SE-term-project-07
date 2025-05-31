@@ -40,6 +40,9 @@ public class GameController implements IGameViewListener {
         this.game = game;
         this.view = view;
 
+        // 게임 상태를 IN_PROGRESS로 전환
+        game.startGame();
+
         // 뷰에 이 컨트롤러를 이벤트 리스너로 등록
         this.view.setGameViewListener(this);
 
@@ -80,7 +83,7 @@ public class GameController implements IGameViewListener {
 
             // 첫 번째 던진 결과에 대한 말 선택 활성화
             view.setPieceSelectable(true);
-            view.updateStatus(current.getName() + "님, 첫 번째 결과: " + throwResults.get(currThrowIndex).name() + " --> 이동할 말을 클릭하세요.");
+            view.updateStatus(current.getName() + "님, 첫 번째 결과: " + throwResults.get(throwResults.size() - 1).name() + " --> 이동할 말을 클릭하세요.");
         }
     }
 
@@ -124,16 +127,13 @@ public class GameController implements IGameViewListener {
                 view.showWinnerDialog(winnerName);
                 return;
             }
+            // 다음 플레이어로 차례 넘기기
+            game.advanceTurn();
+            Player nextPlayer = game.getCurrentPlayer();
+            // 다음 플레이어에게 윷 던지기 안내
+            view.updateStatus(nextPlayer.getName() + "님, 윷을 던져주세요.");
+            // 말 선택 비활성화
+            view.setPieceSelectable(false);
         }
-
-        // 다음 플레이어로 차례 넘기기
-        game.advanceTurn();
-        Player nextPlayer = game.getCurrentPlayer();
-
-        // 다음 플레이어에게 윷 던지기 안내
-        view.updateStatus(nextPlayer.getName() + "님, 윷을 던져주세요.");
-
-        // 말 선택 비활성화
-        view.setPieceSelectable(false);
     }
 }

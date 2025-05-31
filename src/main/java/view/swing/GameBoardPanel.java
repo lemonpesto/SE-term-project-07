@@ -96,13 +96,13 @@ public class GameBoardPanel extends JPanel {
                 // 방향성에 따라 계산법 달라짐!
                 double t;
                 if (vi == 0 || vi == sides-1) {
-                    // D0_0, D0_1, Dn-1_0, Dn-1_1 : 중앙→꼭짓점 방향
+                    // D0_0, D0_1, Dn-1_0, Dn-1_1 : 중앙-->꼭짓점 방향
                     t = (dj == 0) ? 0.7 : 0.4; // Di_0이 더 바깥쪽
                     int x = (int)(v.x * (1-t) + centerPoint.x * t);
                     int y = (int)(v.y * (1-t) + centerPoint.y * t);
                     return new Point(x, y);
                 } else {
-                    // V1~Vn-2: 꼭짓점→중앙 방향
+                    // V1~Vn-2: 꼭짓점-->중앙 방향
                     t = (dj == 0) ? 0.4 : 0.7; // Di_0이 더 꼭짓점 쪽
                     int x = (int)(v.x * (1-t) + centerPoint.x * t);
                     int y = (int)(v.y * (1-t) + centerPoint.y * t);
@@ -199,9 +199,9 @@ public class GameBoardPanel extends JPanel {
         for (int idx = 0; idx < nPlayers; idx++) {
             Player player = players.get(idx);
             // “idx”가 가리키는 사분면 계산
-            //  2명 → idx=0→Ⅱ, idx=1→Ⅳ
-            //  3명 → idx=0→Ⅱ, idx=1→Ⅰ, idx=2→Ⅳ
-            //  4명 → idx=0→Ⅱ, idx=1→Ⅰ, idx=2→Ⅳ, idx=3→Ⅲ
+            //  2명 --> idx=0-->Ⅱ, idx=1-->Ⅳ
+            //  3명 --> idx=0-->Ⅱ, idx=1-->Ⅰ, idx=2-->Ⅳ
+            //  4명 --> idx=0-->Ⅱ, idx=1-->Ⅰ, idx=2-->Ⅳ, idx=3-->Ⅲ
             Point quadCenter = computeQuadrantPoint(idx, nPlayers);
 
             // “플레이어 이름”을 사분면의 중앙(조금 위) 에 그린다.
@@ -268,9 +268,9 @@ public class GameBoardPanel extends JPanel {
      * Off-board 말들을 놓을 “사분면 중심 좌표”를 반환한다.
      *
      * 사분면 분배 기준:
-     *  - nPlayers == 2: idx=0 → II사분면, idx=1 → Ⅳ사분면
-     *  - nPlayers == 3: idx=0 → II, idx=1 → Ⅰ, idx=2 → Ⅳ
-     *  - nPlayers == 4: idx=0 → II, idx=1 → Ⅰ, idx=2 → Ⅳ, idx=3 → Ⅲ
+     *  - nPlayers == 2: idx=0 --> II사분면, idx=1 --> Ⅳ사분면
+     *  - nPlayers == 3: idx=0 --> II, idx=1 --> Ⅰ, idx=2 --> Ⅳ
+     *  - nPlayers == 4: idx=0 --> II, idx=1 --> Ⅰ, idx=2 --> Ⅳ, idx=3 --> Ⅲ
      *
      * 사분면별 중심 좌표 계산:
      *  - I사분면: (CENTER + OFFBOARD_RADIUS, CENTER - OFFBOARD_RADIUS)
@@ -283,7 +283,7 @@ public class GameBoardPanel extends JPanel {
         int qx = 0, qy = 0;
         switch (nPlayers) {
             case 2:
-                // idx=0 → II, idx=1 → Ⅳ
+                // idx=0 --> II, idx=1 --> Ⅳ
                 if (idx == 0) {
                     qx = CENTER - OFFBOARD_RADIUS;
                     qy = CENTER - OFFBOARD_RADIUS;
@@ -293,7 +293,7 @@ public class GameBoardPanel extends JPanel {
                 }
                 break;
             case 3:
-                // idx=0→II, idx=1→I, idx=2→Ⅳ
+                // idx=0-->II, idx=1-->I, idx=2-->Ⅳ
                 if (idx == 0) {
                     qx = CENTER - OFFBOARD_RADIUS;
                     qy = CENTER - OFFBOARD_RADIUS;
@@ -306,7 +306,7 @@ public class GameBoardPanel extends JPanel {
                 }
                 break;
             case 4:
-                // idx=0→II, idx=1→I, idx=2→Ⅳ, idx=3→III
+                // idx=0-->II, idx=1-->I, idx=2-->Ⅳ, idx=3-->III
                 if (idx == 0) {
                     qx = CENTER - OFFBOARD_RADIUS;
                     qy = CENTER - OFFBOARD_RADIUS;
@@ -332,7 +332,7 @@ public class GameBoardPanel extends JPanel {
 
     /**
      * 플레이어(Player) 객체의 인덱스를 기준으로 말 색을 정한다.
-     * 예) playerIndex 0→BLUE, 1→GREEN, 2→ORANGE, 3→MAGENTA, 나머지→BLACK
+     * 예) playerIndex 0-->BLUE, 1-->GREEN, 2-->ORANGE, 3-->MAGENTA, 나머지-->BLACK
      */
     private Color getColorForPlayer(Player player) {
         int idx = player.getId();

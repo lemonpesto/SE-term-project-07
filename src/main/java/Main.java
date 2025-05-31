@@ -27,7 +27,7 @@ public class Main {
 //            view = new OtherToolkitGameView(game.getBoard());
 //        }
 
-        // (3) 컨트롤러 생성 → 이벤트 릴레이, 화면 띄우기 시작
+        // (3) 컨트롤러 생성 --> 이벤트 릴레이, 화면 띄우기 시작
         GameController controller = new GameController(game, view);
     }
 }

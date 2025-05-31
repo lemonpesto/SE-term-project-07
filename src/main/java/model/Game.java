@@ -20,7 +20,7 @@ public class Game {
     private final MoveActionService moveActionService;
     private final RuleEngine ruleEngine;
 
-    // 게임 상태: READY → IN_PROGRESS → FINISHED
+    // 게임 상태: READY --> IN_PROGRESS --> FINISHED
     private GameStatus gameStatus; // 현재 게임 상태
 
     private enum GameStatus{
@@ -137,6 +137,13 @@ public class Game {
 
     // —— Getter / Helper 메서드 —— //
 
+    // 게임을 실제로 시작하여 IN_PROGRESS로 전환하는 메서드
+    public void startGame() {
+        if (this.gameStatus == GameStatus.READY) {
+            this.gameStatus = GameStatus.IN_PROGRESS;
+        }
+    }
+
     // 현재 차례인 Player 객체 반환
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
@@ -174,4 +181,5 @@ public class Game {
     public Board getBoard(){
         return board;
     }
+
 }

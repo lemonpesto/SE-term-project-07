@@ -18,7 +18,7 @@ public class StatusPanel extends JPanel {
         String text = String.format("결과: %s (%d칸) %s",
                 result.name(),
                 result.getSteps(),
-                result.isExtraTurn() ? "→ 추가 던지기!" : "");
+                result.isExtraTurn() ? "--> 추가 던지기!" : "");
         resultLabel.setText(text);
     }
 }
