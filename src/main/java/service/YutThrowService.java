@@ -15,7 +15,7 @@ public class YutThrowService {
      * 네 개의 윷을 던져 나온 스텝 수 반환
      * 빽도: -1, 도:1, 개:2, 걸:3, 윷:4, 모:5
      */
-    public static ThrowResult throwRandom() {
+    public ThrowResult throwRandom() {
         // 1: 뒤집어짐, 0: 안 뒤집어짐.
         int yut1 = RANDOM.nextInt(2);
         int yut2 = RANDOM.nextInt(2);

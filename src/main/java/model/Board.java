@@ -21,6 +21,8 @@ public class Board {
     private final Cell startCell; // V0
     private final Cell centerCell;
 
+    // Game이 생성될 때 한 번만 세팅해 주는 플레이어 순서 리스트
+
     /**
      * @param shape 판 형태 (SQUARE, PENTAGON, HEXAGON)
      */

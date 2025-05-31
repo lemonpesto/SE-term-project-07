@@ -25,7 +25,7 @@ public class MainFrame extends JFrame {
     private final ControlPanel controlPanel;
     private final StatusPanel statusPanel;
     private final GameBoardPanel boardPanel;
-    private final GameController controller;
+//    private final GameController controller;
 
     public MainFrame() {
         super("OOAD 윷놀이 게임");
@@ -48,7 +48,7 @@ public class MainFrame extends JFrame {
         // 3) 뷰 초기화
         controlPanel = new ControlPanel();
         statusPanel = new StatusPanel();
-        boardPanel = new GameBoardPanel(game.getBoard());
+        boardPanel = new GameBoardPanel(game.getBoard(), game);
 
         controlPanel.setupPieceSelector(game.getPlayers().get(0).getPieces());
 
@@ -60,9 +60,9 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         // 4) 컨트롤러 연결
-        controller = new GameController(
-                game, boardPanel, controlPanel, statusPanel
-        );
+//        controller = new GameController(
+//                game, boardPanel, controlPanel, statusPanel
+//        );
     }
 
     public void start() {

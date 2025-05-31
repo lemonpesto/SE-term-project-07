@@ -32,11 +32,6 @@ public class Player {
     public List<PieceGroup> getPieceGroups() { return pieceGroups; }
     public boolean getIsFinished() { return isFinished; }
 
-    // setter
-    public void setFinished(boolean isFinished) {
-        this.isFinished = isFinished;
-    }
-
     // 플레이어의 말들 중에서 (내보내지 않은 상태의) 선택
     public Piece selectPiece() {
         for (Piece piece : pieces) {
@@ -48,16 +43,16 @@ public class Player {
         return null;
     }
 
-    // 플레이어가 모든 말을 내보냈는지 확인하고, 그렇다면 isFinished를 true로 설정
-    public void isFinished(){
+    // 플레이어가 모든 말을 내보냈는지 확인하고, 그렇다면 finishFlag를 true로 설정 후 반환
+    public boolean hasAllPiecesFinished() {
         for(Piece piece : pieces){
             // 플레이어가 가진 말의 상태가 하나라도 FINISHED 상태가 아니라면 isFinished를 false로 설정하고 함수 종료
             if(!(piece.getState() == PieceState.FINISHED)){
-                setFinished(false);
-                return;
+                return this.isFinished = false;
             }
         }
         // 플레이어가 가진 모든 말의 상태가 FINISHED인 경우 isFinished를 true로 설정
-        setFinished(true);
+        return this.isFinished = true;
     }
+
 }
