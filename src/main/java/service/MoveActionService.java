@@ -12,23 +12,51 @@ public class MoveActionService {
         this.ruleEngine = ruleEngine;
     }
 
-    /** 말 이동시킨 후 룰 적용 */
-    public void movePiece(Piece piece, ThrowResult result, Game game) {
-        // 이동
-        Cell destination;
-        if (result == ThrowResult.BACK_DO) {
-            destination = piece.backToPrevious();
+    /** 단일 Piece 이동 메서드 */
+    public void movePiece(Piece piece, ThrowResult throwResult, Game game) {
+        // piece가 그룹으로 묶여 있는지 확인
+        PieceGroup group = piece.getGroup();
+
+        if(group != null && group.size() > 1){
+            // 이미 그룹 상태면 그룹 전체를 이동
+            movePiece(group, throwResult, game);
+        }else{
+            // 그룹에 속해있지 않다면
+            PieceGroup singleGroup = new PieceGroup(piece.getOwner()); // 크기 1 그룹을 임시로 만들어 처리
+            singleGroup.grouping(piece);
+            movePiece(singleGroup, throwResult, game);
+        }
+    }
+
+    // PieceGroup 전체를 이동시키는 오버로드 메서드: 그룹 이동시킨 후 룰 적용
+    public void movePiece(PieceGroup group, ThrowResult throwResult, Game game) {
+        // 현재 그룹이 어떤 Cell 위에 올라가 있는지 조회
+        Cell start = group.getCurrentCell();
+        int steps = throwResult.getSteps();
+
+        // 전진/후진에 따라 target Cell 결정
+        Cell target;
+        if (throwResult == ThrowResult.BACK_DO) { // 뒤로 한 칸 이동한 타겟 셀 계산
+            target = group.backToPrevious();
         } else {
-            destination = moveForward(piece, result.getSteps());
+            target = moveForward(start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
         }
 
+        // 그룹 이동
+        group.moveGroupTo(target);
+
         // 룰 적용
-        applyRules(piece.getOwner(), destination, game);
+        applyRules(group.getOwner(), target, game);
+
+        // 5) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
+//        if (group.getOwner().hasAllPiecesFinished()) {
+//            game.addFinishedPlayer(group.getOwner());
+//        }
     }
 
     /** steps만큼 순방향 이동 후 도착 cell 반환 */
-    private Cell moveForward(Piece piece, int steps) {
-        Cell current = piece.getPosition();
+    private Cell moveForward(Cell from, int steps) {
+        Cell current = from;
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
             Cell next;
@@ -38,7 +66,6 @@ public class MoveActionService {
             } else{
                 next = nextList.get(0); // 그 외는 항상 인덱스 0 따라감
             }
-            piece.moveTo(next);
             current = next;
         }
         return current;
@@ -48,7 +75,7 @@ public class MoveActionService {
     private void applyRules(Player player, Cell cell, Game game) {
         // 말 업기
         if (ruleEngine.applyGrouping(cell)) {
-            PieceGroup group = new PieceGroup();
+            PieceGroup group = new PieceGroup(player);
             for (Piece p : cell.getOccupants()) {
                 group.grouping(p);
             }

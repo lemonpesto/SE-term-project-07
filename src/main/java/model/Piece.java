@@ -13,7 +13,7 @@ public class Piece {
     private Cell position; // 말의 현재 위치
     private PieceGroup group; // 말이 속해있는 그룹
     private PieceState state; // 말이 아직 보드판에 나오지 않았는지, 보드판에 있는지, 도착점을 지나 더 이상 움직일 수 없는 말인지 상태를 나타냄
-    private final List<Cell> path;    // 이동 경로 기록
+    private List<Cell> path;    // 이동 경로 기록
 
     // 생성자
     public Piece(int id, Player owner, Cell startPosition) {
@@ -26,7 +26,8 @@ public class Piece {
         this.path.add(startPosition); // 모든 말의 경로는 출발점부터 시작됨
     }
 
-    // getter
+    // --- Getter --- //
+
     public int getId() { return id; }
     public Player getOwner() { return owner; }
     public Cell getPosition() { return position; }
@@ -38,7 +39,8 @@ public class Piece {
         return path.getLast();
     }
 
-    // setter
+    // --- Setter --- //
+
     void setGroup(PieceGroup group) {
         this.group = group;
     }
@@ -56,21 +58,6 @@ public class Piece {
         this.path.add(dest);                // 경로 기록
         // 말이 한 바퀴를 돌아 시작 Cell에 도착했을 때 말의 상태를 바꾸는 로직을 설계 중이었는데 시작 Cell을 어떻게 인식하느냐...에 대한 문제
         // 빽도에 의해 다시 시작 Cell로 돌아온 경우는 어떻게 예외 처리를 할 건지...에 대한 고민
-    }
-
-    public Cell backToPrevious() {
-        if (path.size() < 2) {
-            throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
-        }
-        // 마지막 기록 제거
-        path.remove(path.size() - 1);
-        // 이전 셀
-        Cell prev = path.get(path.size() - 1);
-        // 실제 위치 업데이트
-        this.position.removePiece(this);
-        prev.addPiece(this);
-        this.position = prev;
-        return prev;
     }
 
 }

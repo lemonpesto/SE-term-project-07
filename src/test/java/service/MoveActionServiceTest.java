@@ -98,6 +98,7 @@ public class MoveActionServiceTest {
         assertEquals(c16.getId(), pieceA.getCurrentCell().getId(), "MO는 다섯 칸 이동해야 한다.");
     }
 
+
     /**
      * 뒤로 이동(Back throw 'BAEK') 기능 테스트: 한 칸 뒤로 이동해야 한다.
      */
