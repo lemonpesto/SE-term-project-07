@@ -34,6 +34,10 @@ public class Piece {
     public PieceState getState(){ return state; }
     public List<Cell> getPath() { return new ArrayList<>(path); }
 
+    public Cell getCurrentCell() {
+        return path.getLast();
+    }
+
     // setter
     void setGroup(PieceGroup group) {
         this.group = group;
@@ -68,4 +72,5 @@ public class Piece {
         this.position = prev;
         return prev;
     }
+
 }

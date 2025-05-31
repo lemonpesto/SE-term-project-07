@@ -30,8 +30,14 @@ public class MoveActionService {
     private Cell moveForward(Piece piece, int steps) {
         Cell current = piece.getPosition();
         for (int i = 0; i < steps; i++) {
-            List<Cell> nextList = current.getNextCells();
-            Cell next = (nextList.size() == 1) ? nextList.get(0) : nextList.get(1);
+            List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
+            Cell next;
+            if(i == 0 && nextList.size()  == 2){
+                // 첫 시작 Cell이 분기점(즉, 다음 셀이 2개 이상)이면
+                next = nextList.get(1); // 대각길(지름길/인덱스 1) 경로로 들어가고
+            } else{
+                next = nextList.get(0); // 그 외는 항상 인덱스 0 따라감
+            }
             piece.moveTo(next);
             current = next;
         }

@@ -182,4 +182,8 @@ public class Game {
         return board;
     }
 
+    public RuleEngine getRuleEngine() {
+        return ruleEngine;
+    }
+
 }
