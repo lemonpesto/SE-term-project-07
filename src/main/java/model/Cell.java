@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Cell {
     private final String id;
-    private List<Cell> nextCells = new ArrayList<>();
-    private List<Piece> occupants = new ArrayList<>();
+    private List<Cell> nextCells = new ArrayList<>(); // 바로 다음 cell
+    private List<Piece> occupants = new ArrayList<>(); // 해당 셀에 있는 말
 
     public Cell(String id) {
         this.id = id; // 꼭짓점: V0, V1, ..., 일반 셀: E0_0, E0_1, ...

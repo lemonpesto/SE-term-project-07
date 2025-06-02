@@ -20,7 +20,8 @@ public class RuleEngine{
         return true;
     }
 
-    public boolean applyGrouping(Cell cell){
+    // 업을 상황인지 확인
+    public boolean checkGrouping(Cell cell){
         //한 cell에 말 두개 오면 업기
         //이게 룰이 내가 업는 걸 구현하는 건 아닌 것 같은데 무얼하는건지...
         //업을수잇는지 조건체크인가보다
@@ -31,7 +32,8 @@ public class RuleEngine{
             //&& cell위의 말들이 모두 같은 팀이면.
     }
 
-    public boolean applyCapture(Cell cell){
+    // 잡을 상황인지 확인
+    public boolean checkCapture(Cell cell){
         //상대편 말 잡기
         List<Piece> occupants = cell.getOccupants();
         return occupants.size() > 1 && !checkSamePiecesInCell(cell); //여러 말이 있고, 그 중 서로 다른팀의 말이 있다면.

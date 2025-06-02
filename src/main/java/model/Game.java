@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class Game {
     private List<Player> players = new ArrayList<>(); // 현재 게임에 참여하는 플레이어들
+    private Player currentPlayer;
     private List<Player> finishedPlayers = new ArrayList<>(); // 말을 모두 내보내서 윷을 던질 수 없는 플레이어들 (먼저 끝날수록 먼저 추가되므로 순위 파악에 활용 가능)
     private GameStatus gameStatus; // 현재 게임 상태
     private final BoardShape boardShape;
@@ -50,6 +51,7 @@ public class Game {
         // 게임 중 상태일 때만 반복
         while (this.gameStatus == GameStatus.IN_PROGRESS) {
             for(Player currentPlayer : players) { // currentPlayer : 현재 턴인 플레이어
+                this.currentPlayer = currentPlayer;
                 // 이번 플레이어가 모든 말을 내보냈다면 이 플레이어는 더 이상 윷놀이 게임에 참여하지 않음 => 다음 플레이어에게 턴을 넘김
                 if(currentPlayer.getIsFinished()){
                     continue;
@@ -94,8 +96,8 @@ public class Game {
 
         // 2) 각 결과별로 이동할 말을 사용자에게 선택받고 이동
         for (ThrowResult r : results) {
-            Piece piece = player.selectPiece();
-            moveActionService.movePiece(piece, r, this);
+            //Piece piece = player.selectPiece();
+            //moveActionService.movePiece(piece, r, this);
         }
     }
 
@@ -113,6 +115,7 @@ public class Game {
     public List<Player> getPlayers(){
         return players;
     }
+    public Player getCurrentPlayer() { return currentPlayer; }
 
     public Boolean isFinished(){
         if(players.size()==finishedPlayers.size()) return true;

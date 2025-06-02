@@ -42,7 +42,7 @@ public class GameController {
 
         // simple: move first available piece
         Piece piece = game.getPlayers().get(0).selectPiece();
-        moveService.movePiece(piece, result, game);
+        moveService.movePiece(piece, result);
 
         boardPanel.repaint();
         if (game.isFinished()) {

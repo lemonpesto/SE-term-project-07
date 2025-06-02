@@ -2,8 +2,6 @@ package service;
 
 import model.*;
 
-import java.util.List;
-
 
 public class MoveActionService {
     private final RuleEngine ruleEngine;
@@ -12,9 +10,11 @@ public class MoveActionService {
         this.ruleEngine = ruleEngine;
     }
 
-    /** 말 이동시킨 후 룰 적용 */
-    public void movePiece(Piece piece, ThrowResult result, Game game) {
-        // 이동
+    /**
+     * 윷 던지기 결과 result에 의해 destination cell로 이동한 후 룰 적용
+     */
+    public void movePiece(Piece piece, ThrowResult result) {
+        // result에 의해 결정된 도착 cell인 destination으로 이동
         Cell destination;
         if (result == ThrowResult.BACK_DO) {
             destination = piece.backToPrevious();
@@ -22,33 +22,33 @@ public class MoveActionService {
             destination = moveForward(piece, result.getSteps());
         }
 
-        // 룰 적용
-        applyRules(piece.getOwner(), destination, game);
+        // 도착 cell에서 룰 적용 (잡기, 업기)
+        applyRules(piece, destination);
     }
 
     /** steps만큼 순방향 이동 후 도착 cell 반환 */
     private Cell moveForward(Piece piece, int steps) {
-        Cell current = piece.getPosition();
+        Cell current = piece.getPosition(); // 현재 위치
+
+        // 윷을 던진 결과에 대응하는 칸 수 만큼 전진
         for (int i = 0; i < steps; i++) {
-            List<Cell> nextList = current.getNextCells();
-            Cell next = (nextList.size() == 1) ? nextList.get(0) : nextList.get(1);
-            piece.moveTo(next);
-            current = next;
+            // 나린이 코드
         }
         return current;
     }
 
-    /** 이동 후 적용할 룰들을 분리된 메서드로 구현합니다. */
-    private void applyRules(Player player, Cell cell, Game game) {
-        // 말 업기
-        if (ruleEngine.applyGrouping(cell)) {
+    /** piece가 도착한 cell에서 룰 적용 (잡기, 업기) */
+    private void applyRules(Piece piece, Cell cell) {
+        // cell에 같은 플레이어의 말이 기존에 존재했다면 말을 업기
+        if (ruleEngine.checkGrouping(cell)) {
+            // 기존에 존재한 말이 단독으로 존재했는지, 그룹으로 존재하는지 확인하고 업어야 함
             PieceGroup group = new PieceGroup();
             for (Piece p : cell.getOccupants()) {
                 group.grouping(p);
             }
         }
-        // 상대 말 잡기
-        if (ruleEngine.applyCapture(cell)) {
+        // cell에 다른 플레이어의 말이 기존에 존재했다면 말을 잡기
+        if (ruleEngine.checkCapture(cell)) {
             // capture 처리 로직 호출 (추가 구현 필요)
         }
     }

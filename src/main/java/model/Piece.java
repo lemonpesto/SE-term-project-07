@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 게임에서 사용되는 말(Piece)입니다.
- * 이동 경로(path)를 기록하여 다중 Back-Do 처리를 지원합니다.
+ * 윷놀이 게임에서 사용되는 말(Piece)
  */
 public class Piece {
     private int id; // 말의 고유 ID (각 플레이어마다 자동적으로 0->1->2 ... 방식으로 지정 => 다른 플레이어의 말이면 id값이 같을 수 있음)
@@ -13,14 +12,14 @@ public class Piece {
     private Cell position; // 말의 현재 위치
     private PieceGroup group; // 말이 속해있는 그룹
     private PieceState state; // 말이 아직 보드판에 나오지 않았는지, 보드판에 있는지, 도착점을 지나 더 이상 움직일 수 없는 말인지 상태를 나타냄
-    private final List<Cell> path;    // 이동 경로 기록
+    private final List<Cell> path; // 말이 지나온 cell들의 경로 기록
 
     // 생성자
     public Piece(int id, Player owner, Cell startPosition) {
         this.id = id;
         this.owner = owner;
-        this.position = startPosition; // 말이 시작할 떄 시작점에 위치하는데, 이 시작점 칸을 구분할 수 있는 변수가 Cell 클래스에 있나여
-        this.group = null; // null로 해도 되나여
+        this.position = startPosition;
+        this.group = null;
         this.state = PieceState.NOT_STARTED; // 말이 처음 생성될 때는 보드판으로 나가지 않은 상태
         this.path = new ArrayList<>();
         this.path.add(startPosition); // 모든 말의 경로는 출발점부터 시작됨
@@ -44,19 +43,19 @@ public class Piece {
         pieceGroup.grouping(this);
     }
 
-    // 말을 dest칸으로 옮김
-    public void moveTo(Cell dest) {
+    // 말을 next로 옮김
+    public void moveTo(Cell next) {
         this.position.removePiece(this);    // 현재 칸에서 말 제거 (removePiece() : Cell 클래스에서 해당 Cell에 있는 말을 없애는 메소드를 의미)
-        dest.addPiece(this);                // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
-        this.position = dest;               // 말의 위치를 dest Cell로 변경
-        this.path.add(dest);                // 경로 기록
-        // 말이 한 바퀴를 돌아 시작 Cell에 도착했을 때 말의 상태를 바꾸는 로직을 설계 중이었는데 시작 Cell을 어떻게 인식하느냐...에 대한 문제
-        // 빽도에 의해 다시 시작 Cell로 돌아온 경우는 어떻게 예외 처리를 할 건지...에 대한 고민
+        next.addPiece(this);                // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
+        this.position = next;               // 말의 위치를 next cell로 변경
+        this.path.add(next);                // 경로 기록
     }
 
+    // 백도에 의해 말을 이전 cell로 옮김
     public Cell backToPrevious() {
+        // 시작점에서 백도가 나오는 경우 뒤로 갈 수 있는 cell이 없음
         if (path.size() < 2) {
-            throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
+            return this.position;
         }
         // 마지막 기록 제거
         path.remove(path.size() - 1);
