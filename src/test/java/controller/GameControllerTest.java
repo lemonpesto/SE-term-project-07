@@ -86,7 +86,7 @@ class GameControllerTest {
         controller.onPieceClicked(alicePiece);
 
         // 3-1) playOneTurn(Alice, ThrowResult.YUT, alicePiece) 적용
-        //     --> 보드 최종 상태를 직접 검증하기 어려우므로, 최소한 repaintBoard가 호출되었는지 확인
+        //     --> 보드 최종 상태를 직접 검증하기 어려우므로, 최소한 updateBoard가 호출되었는지 확인
         assertTrue(view.repaintCalled);
         //     --> “다음 결과: DO --> 이동할 말을 클릭하세요.” 메시지가 남아 있어야 함
         assertEquals("Alice님, 다음 결과: DO --> 이동할 말을 클릭하세요.",
@@ -96,7 +96,7 @@ class GameControllerTest {
 
         // --- 4) Alice: 두 번째 이동 처리 ---
         //    (currentThrowIndex = 1)
-        view.resetRepaintFlag(); // repaintBoard 호출 횟수 초기화
+        view.resetRepaintFlag(); // updateBoard 호출 횟수 초기화
         controller.onPieceClicked(alicePiece);
 
         // 4-1) playOneTurn(Alice, ThrowResult.DO, alicePiece) 적용
@@ -147,7 +147,7 @@ class GameControllerTest {
         }
 
         @Override
-        public void repaintBoard() {
+        public void updateBoard() {
             repaintCalled = true;
         }
 

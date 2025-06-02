@@ -86,7 +86,7 @@ public class Game {
         }
 
         // 3) 만약 이 턴에서 마지막 플레이어까지 끝났다면, gameStatus 변경
-        if (isFinished()) {
+        if (isGameOver()) {
             gameStatus = GameStatus.FINISHED;
         }
     }
@@ -115,7 +115,7 @@ public class Game {
         }
 
         // 3) 게임 종료 여부 판단
-        if (isFinished()) {
+        if (isGameOver()) {
             gameStatus = GameStatus.FINISHED;
         }
     }
@@ -155,7 +155,7 @@ public class Game {
     }
 
     // 게임이 FINISHED 상태인지 (즉, 모든 플레이어가 말을 다 끝냈는지) 여부 판단
-    public Boolean isFinished(){
+    public Boolean isGameOver(){
         return players.size()==finishedPlayers.size();
     }
 

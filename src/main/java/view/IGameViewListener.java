@@ -3,13 +3,12 @@ package view;
 import model.Piece;
 
 /**
- * IGameView와 짝을 이루는 Listener 인터페이스.
- * --> 실제 이벤트가 발생했을 때 GameController에 알려 주는 용도.
+ * View(UI 컴포넌트)에서 이벤트가 발생했을 때 GameController에게 알려주는 용도
+ * --> Controller는 이 콜백을 받아서 모델(Game)에게 기능 요청함
  */
 public interface IGameViewListener {
-    /** “윷 던지기” 버튼이 눌렸을 때 호출 */
+    // “윷 던지기” 버튼이 눌렸을 때 호출
     void onThrowButtonClicked();
-
-    /** “말 선택” 버튼이 눌렸을 때 호출 */
-    void onPieceClicked(Piece oiece);
+    // 말이 클릭됐을 때 호출 */
+    void onPieceClicked(Piece piece);
 }

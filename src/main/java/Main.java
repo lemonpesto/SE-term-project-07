@@ -1,34 +1,15 @@
-
-import controller.GameController;
-
-import model.BoardShape;
-import model.Game;
-
-import view.IGameView;
-import view.SwingGameView;
+import controller.SetupController;
 
 import javax.swing.*;
 
+// SetupController만 생성해서 사용자로부터 "플레이어, 말 개수, 보드 모양" 정보를 입력받는 창을 띄움.
 public class Main {
     public static void main(String[] args) {
-        // (1) 모델 생성
-        String[] names = {"Alice", "Bob", "Charlie"};
-        Game game = new Game(3, names, 4, BoardShape.SQUARE);
-
-        // (2) 뷰 선택: Swing, 또는 다른 UI 툴킷
-        // 예를 들어, 실행 시 파라미터나 환경변수에 따라 결정할 수 있다.
-        boolean useSwing = true; // (예시)
-        IGameView view;
-        view = new SwingGameView(game);
-//        if (useSwing) {
-//            view = new SwingGameView(game);
-//        }
-//        else {
-//            view = new OtherToolkitGameView(game.getBoard());
-//        }
-
-        // (3) 컨트롤러 생성 --> 이벤트 릴레이, 화면 띄우기 시작
-        GameController controller = new GameController(game, view);
+        SwingUtilities.invokeLater(() -> {
+            // SetupController가 내부에서 SetupFrame을 생성하고
+            // 이벤트 리스너를 등록한 뒤 화면을 보여 줍니다.
+            new SetupController();
+        });
     }
 }
 
