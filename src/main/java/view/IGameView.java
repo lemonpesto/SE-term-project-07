@@ -1,5 +1,9 @@
 package view;
 
+import model.Player;
+
+import java.util.List;
+
 /**
  * UI 툴킷에 무관하게 GameController가 사용할 공통 “View” 기능들만 선언해 둔 인터페이스
  * 화면 갱신/이벤트 등록용 메서드
@@ -24,5 +28,5 @@ public interface IGameView {
     void setThrowEnabled(boolean enabled);
 
     // 게임이 끝나서 순위가 결정되었을 때 팝업창 띄워 달라고 요청
-    void showWinnerDialog(String winnerName); // !! winner가 아니라 등수로 보여지도록 수정 !!
+    void showRankingDialog(List<Player> ranking); // !! winner가 아니라 등수로 보여지도록 수정 !!
 }

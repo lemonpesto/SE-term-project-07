@@ -11,8 +11,7 @@ import view.swing.SwingSetupView;
 /**
  * SetupController
  *
- * -- 사용자 설정 화면에서 '게임 시작' 버튼을 눌렀을 때
- *    전달받은 정보를 바탕으로 Game 모델 생성 후 실제 게임 화면으로 전환함
+ * -- 사용자 설정 화면에서 <게임 시작> 버튼을 눌렀을 때 전달받은 정보를 바탕으로 Game 모델 생성 후 실제 게임 화면으로 전환함
  */
 public class SetupController implements ISetupViewListener {
 
@@ -24,7 +23,7 @@ public class SetupController implements ISetupViewListener {
         view.showView();
     }
 
-    // 사용자가 '게임 시작' 버튼을 눌렀을 때 호출됨
+    // 사용자가 <게임 시작> 버튼을 눌렀을 때 호출됨
     @Override
     public void onStartClicked(String[] playerNames, int piecesPerPlayer, BoardShape boardShape) {
         // 1) Game 모델 객체 생성 및 시작

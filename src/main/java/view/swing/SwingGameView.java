@@ -1,10 +1,7 @@
 // src/view/swing/SwingGameView.java
 package view.swing;
 
-import model.Piece;
-import model.Board;
-import model.Game;
-import model.ThrowResult;
+import model.*;
 import view.IGameView;
 import view.IGameViewListener;
 
@@ -12,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
  * SwingGameView
@@ -138,14 +136,22 @@ public class SwingGameView extends JPanel implements IGameView {
     }
 
     @Override
-    public void showWinnerDialog(String winnerName) {
+    public void showRankingDialog(List<Player> ranking) {
+        // 여러 명의 등수를 한 번에 보여주는 다이얼로그
+        // 예: “1등: Alice\n2등: Bob\n3등: Charlie\n4등: Dave”
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ranking.size(); i++) {
+            Player p = ranking.get(i);
+            sb.append((i + 1)).append("등: ").append(p.getName()).append("\n");
+        }
         JOptionPane.showMessageDialog(
                 this,
-                winnerName + "님이 승리하셨습니다!",
-                "게임 종료",
+                sb.toString(),
+                "최종 등수",
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
+
 
     @Override
     public void setGameViewListener(IGameViewListener listener) {
