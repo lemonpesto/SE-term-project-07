@@ -23,7 +23,7 @@ public class GameController implements IGameViewListener {
     private final Game game;        // 모델
     private final IGameView view;   // 뷰
 
-    // 윷 던지기 결과들 모아둘 리스트: onThrowButtonClicked() 호출 시 윷 던지기 결과를 add 해놓다가 onPieceClicked() 때 그 턴의 윷 던지기 결과들을 사용
+    // 윷 던지기 결과들 모아둘 리스트: onThrowButtonClicked() 호출 시 윷 던지기 결과를 add 해놓다가 onPieceClicked() 때 그 턴의 윳 던지기 결과들을 사용
     private final List<ThrowResult> throwResults = new ArrayList<>();
 
     // 말 이동 단계에서 현재 처리 중인 ThrowResults 인덱스
@@ -42,22 +42,20 @@ public class GameController implements IGameViewListener {
         // 게임 상태를 IN_PROGRESS로 전환
         game.startGame();
 
-        // 뷰를 초기화하고, 뷰에 이 컨트롤러를 이벤트 리스너로 등록
+        // 뷰에 이 컨트롤러를 이벤트 리스너로 등록
         view.setGameViewListener(this);
 
-        // 초기 화면 상태: 첫 플레이어가 윷 던지기
+        // 창 표시 (이 순서가 중요)
+        view.showWindow();
+
+        // 초기 화면 상태 설정
         Player currPlayer = game.getCurrentPlayer();
         view.updateStatus(currPlayer.getName() + "님, 윷을 던져주세요.");
-
-        // 초기 클릭 상태: “말 선택”은 비활성화
         view.setPieceSelectable(false);
-
-        // 실제 창 띄우기
-        view.showWindow();
     }
 
     /**
-     * “윷 던지기” 버튼이 클릭되면 호출됨 (IGameViewListener 인터페이스 메서드)
+     * "윷 던지기" 버튼이 클릭되면 호출됨 (IGameViewListener 인터페이스 메서드)
      */
     @Override
     public void onThrowButtonClicked() {
@@ -74,7 +72,7 @@ public class GameController implements IGameViewListener {
         if (throwResult.isExtraTurn()) {
             // extraTurn == true --> 윷 더 던지기
             view.setPieceSelectable(false);
-            view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + "한 번 더 던져주세요!");
+            view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + " 한 번 더 던져주세요!");
         } else {
             // extraTurn == false --> 윷 던지기 종료, 말 이동 단계로 전환
             isProcessingThrows = true;
@@ -87,7 +85,7 @@ public class GameController implements IGameViewListener {
     }
 
     /**
-     * “말 클릭” 이벤트가 발생했을 때 호출됨
+     * "말 클릭" 이벤트가 발생했을 때 호출됨
      */
     @Override
     public void onPieceClicked(Piece piece) {
@@ -103,7 +101,7 @@ public class GameController implements IGameViewListener {
         game.playTurn(currPlayer, throwResult, piece);
         // 화면 업데이트
         view.updateBoard();
-        // 다음에 처리할 ThrowResult로 인덱스 없데이트
+        // 다음에 처리할 ThrowResult로 인덱스 업데이트
         currThrowIndex++;
 
         // 다음 ThrowResult가 남아 있는지 확인
@@ -117,7 +115,7 @@ public class GameController implements IGameViewListener {
         } else{
             // 모든 ThrowResult 처리 완료했다면
             isProcessingThrows = false;
-            throwResults.clear();   // 윷 던지기 결과 리스트 초기화
+            throwResults.clear();   // 짋 던지기 결과 리스트 초기화
             currThrowIndex = 0;     // 인덱스 리셋
 
             // 게임 종료 여부 확인
@@ -126,8 +124,10 @@ public class GameController implements IGameViewListener {
                 view.showWinnerDialog(winnerName);
                 return;
             }
+
+            // 턴 종료 처리
+            nextTurn();
         }
-        nextTurn();
     }
 
     // 턴 종료 시 호출
@@ -135,10 +135,9 @@ public class GameController implements IGameViewListener {
         // 다음 플레이어로 차례 넘기기
         game.advanceTurn();
         Player nextPlayer = game.getCurrentPlayer();
-        // 다음 플레이어에게 윷 던지기 안내
+        // 다음 플레이어에게 윻 던지기 안내
         view.updateStatus(nextPlayer.getName() + "님, 윷을 던져주세요.");
         // 말 선택 비활성화
         view.setPieceSelectable(false);
     }
-
 }
