@@ -35,7 +35,6 @@ public class MoveActionService {
     public void movePiece(PieceGroup group, ThrowResult throwResult, Game game) {
         Cell start = group.getCurrentCell(); // 현재 그룹이 올라가 있는 Cell
         int steps = throwResult.getSteps();     // 이동할 칸 수
-        Player currPlayer = group.getOwner();
 
         // 전진/후진에 따라 target Cell 결정
         Cell target;
@@ -59,6 +58,13 @@ public class MoveActionService {
      */
     private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
+        // 출발점에 있으면서 이미 ON_BOARD 상태인 말이 윷을 던졌을 때 --> 탈출 처리
+        if(from.isStartCell() && group.getPieces().get(0).getState() == PieceState.ON_BOARD){
+            // 남은 이동 칸을 1 이상이라 가정하여 탈출 처리
+            updatePiecesState(group, current, 1);
+            return current;
+        }
+
 
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
@@ -93,7 +99,6 @@ public class MoveActionService {
      */
     private void applyRules(PieceGroup movingGroup, Cell cell, Game game) {
         // 말 업기
-
         if (ruleEngine.applyGrouping(cell)) {
             PieceGroup group = new PieceGroup(movingGroup.getOwner());
             for (Piece p : cell.getOccupants()) {

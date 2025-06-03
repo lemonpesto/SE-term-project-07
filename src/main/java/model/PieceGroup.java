@@ -100,10 +100,10 @@ public class PieceGroup {
             throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
         } else if(path.size() > 2){
             // 마지막 기록 제거
-            path.remove(path.size() - 1);
+            path.removeLast();
             // 돌아갈 이전 Cell
-            Cell prev = path.get(path.size() - 1);
-            path.remove(path.size() - 1);
+            Cell prev = path.getLast();
+            path.removeLast();
             // 그룹 내 모든 말들 경로 중간 업데이트
             setPiecesPath(path);
             // 실제 위치 업데이트
@@ -111,11 +111,6 @@ public class PieceGroup {
         } // else: path가 startCell, 첫 번째 cell인 경우는 첫 번째 cell을 삭제하지 않음
         else{ // 도 위치(E0_0)에서 빽도 나온 상황
             moveGroupTo(path.get(0));
-        }
-
-        System.out.println("빽도 적용 후 경로: ");
-        for(Cell c : path){
-            System.out.print(c.getId()+" ");
         }
         return getCurrentCell();
     }
