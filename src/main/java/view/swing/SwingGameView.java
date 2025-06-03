@@ -23,6 +23,8 @@ import java.awt.event.MouseEvent;
  * - “지정 윷 던지기” 버튼을 누르면
  *   JOptionPane으로 빽도/도/개/걸/윷/모 중 선택하게 한 뒤
  *   선택된 ThrowResult를 컨트롤러로 전달합니다.
+ * - 말 클릭 시, 컨트롤러에 클릭된 Piece를 전달합니다.
+ *   (단, 소유주 검사는 컨트롤러에서 수행)
  */
 public class SwingGameView extends JPanel implements IGameView {
 
@@ -39,9 +41,7 @@ public class SwingGameView extends JPanel implements IGameView {
     public SwingGameView(Game game) {
         setLayout(new BorderLayout());
 
-        // ────────────────────────────────────────────────────────────────────
-        // [1] 중앙: 보드판 패널
-        // ────────────────────────────────────────────────────────────────────
+        // ---- [1] 중앙: 보드판 패널 ---- //
         boardPanel = new GameBoardPanel(game.getBoard(), game);
         add(boardPanel, BorderLayout.CENTER);
 
@@ -55,6 +55,7 @@ public class SwingGameView extends JPanel implements IGameView {
                 Point clickPoint = e.getPoint();
                 Piece clicked = boardPanel.getPieceAtPoint(clickPoint);
                 if (clicked != null) {
+                    // 소유주 검사는 GameController에서 수행하므로, 여기서는 단순 전달
                     listener.onPieceClicked(clicked);
                 }
             }
@@ -97,7 +98,6 @@ public class SwingGameView extends JPanel implements IGameView {
 
         fixedThrowButton.addActionListener(e -> {
             // “지정 윷 던지기” 버튼 클릭 시
-            // 빽도/도/개/걸/윷/모 중 하나를 선택하는 다이얼로그 표시
             String[] options = { "BACK_DO", "DO", "GAE", "GEOL", "YUT", "MO" };
             String choice = (String) JOptionPane.showInputDialog(
                     SwingGameView.this,
@@ -109,7 +109,6 @@ public class SwingGameView extends JPanel implements IGameView {
                     options[1]  // 기본값 DO
             );
             if (choice != null && listener != null) {
-                // 사용자가 취소하지 않고 선택했을 때만 호출
                 ThrowResult tr = ThrowResult.valueOf(choice);
                 listener.onFixedThrowClicked(tr);
             }
@@ -160,7 +159,6 @@ public class SwingGameView extends JPanel implements IGameView {
 
     @Override
     public void setThrowEnabled(boolean enabled) {
-        // 필요에 따라 두 버튼 중 하나만 활성화할 수도 있습니다.
         randomThrowButton.setEnabled(enabled);
         fixedThrowButton.setEnabled(enabled);
     }

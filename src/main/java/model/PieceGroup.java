@@ -120,15 +120,4 @@ public class PieceGroup {
         System.out.println();
         return getCurrentCell();
     }
-
-//
-//    public void handleFinished(Cell start){
-//        if(start.isStartCell()){
-//
-//        }
-//        for (Piece piece : pieces) {
-//            piece.moveTo(nextCell);
-//            setGroupPath(piece);
-//        }
-//    }
 }
