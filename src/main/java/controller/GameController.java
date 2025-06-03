@@ -50,8 +50,9 @@ public class GameController implements IGameViewListener {
         Player firstPlayer = game.getCurrentPlayer();
         view.updateStatus(firstPlayer.getName() + "님, 윷을 던져주세요.");
 
-        // 초기 클릭 상태: “말 선택”은 비활성화
+        // 초기 클릭 상태: 말 선택 비활성화, 윷 던지기 버튼 활성화
         view.setPieceSelectable(false);
+        view.setThrowEnabled(true);
 
         // 실제 창 띄우기
         view.showWindow();
@@ -61,19 +62,19 @@ public class GameController implements IGameViewListener {
      * “윷 던지기” 버튼이 클릭되면 호출됨 (IGameViewListener 인터페이스 메서드)
      */
     @Override
-    public void onThrowButtonClicked() {
+    public void onRandomThrowClicked() {
         Player currPlayer = game.getCurrentPlayer(); // 현재 차례 플레이어
 
-        // 1) 윷 던지기
+        // 1) 랜덤하게 윷 던지기
         ThrowResult throwResult = game.getThrowService().throwRandom();
         throwResults.add(throwResult);
 
-        // 2) extraTurn 여부에 따라 윷 던지기 계속할지 결정
+        // 2) extraTurn이 있으면 계속 던지기
         if (throwResult.isExtraTurn()) {
             // extraTurn == true(윷/모) --> 윷 더 던지기
             view.setThrowEnabled(true);     // 윷 던지기 버튼 활성화
             view.setPieceSelectable(false); // 아직 말 선택 X
-            view.updateStatus(currPlayer.getName() + "님, 윷 결과: " + throwResult.name() + " 입니다. 한 번 더 던져주세요!");
+            view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + " 입니다. 한 번 더 던져주세요!");
         } else {
             // extraTurn == false --> 윷 던지기 종료, 말 선택 및 이동 단계로 전환
             isProcessingThrows = true;
@@ -95,6 +96,45 @@ public class GameController implements IGameViewListener {
                 // 윷 여러 번 던진 경우
                 view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResults.get(throwResults.size() - 1).name() + " 입니다." // 현재 결과
                         + "\n첫 번째 결과: " + throwResults.get(0).name() + " 를 적용시킬 말을 클릭하세요."); // 첫 번째 결과
+            }
+        }
+    }
+
+    /**
+     * <지정 윷 던지기> 버튼이 클릭되어
+     * 사용자가 직접 선택한 ThrowResult가 전달될 때 호출됩니다.
+     * extraTurn 여부 판단, 말 선택 단계 전환 등은 onRandomThrowClicked와 동일합니다.
+     */
+    @Override
+    public void onFixedThrowClicked(ThrowResult fixedResult) {
+        Player currPlayer = game.getCurrentPlayer();
+
+        // 1) 사용자가 지정한 윷 결과 저장
+        throwResults.add(fixedResult);
+
+        // 2) extraTurn 여부
+        if (fixedResult.isExtraTurn()) {
+            view.setThrowEnabled(true);
+            view.setPieceSelectable(false);
+            view.updateStatus(currPlayer.getName() + "님, 결과: " + fixedResult.name() + ". 추가 던지기 기회입니다!");
+        } else {
+            isProcessingThrows = true;
+            currThrowIndex = 0;
+            view.setThrowEnabled(false);
+            view.setPieceSelectable(true);
+
+            if (throwResults.size() == 1) {
+                if (fixedResult == ThrowResult.BACK_DO && currPlayer.checkAllPiecesNotStarted()) {
+                    view.updateStatus(currPlayer.getName() + "님, 결과: " + fixedResult.name() + ". 이동할 말이 없습니다.");
+                    nextTurn();
+                } else {
+                    view.updateStatus(currPlayer.getName() + "님, 결과: " + fixedResult.name() + ". 이동할 말을 클릭하세요.");
+                }
+            } else {
+                ThrowResult first = throwResults.get(0);
+                ThrowResult last = throwResults.get(throwResults.size() - 1);
+                view.updateStatus(currPlayer.getName() + "님, 현재 결과: " + last.name()
+                        + " (첫 결과: " + first.name() + ") → 이동할 말을 클릭하세요.");
             }
         }
     }
@@ -126,9 +166,8 @@ public class GameController implements IGameViewListener {
             view.setPieceSelectable(true);
             view.setThrowEnabled(false);
         } else{
-            // 모든 ThrowResult 처리 완료했다면
-
-            // 게임 종료 여부 확인
+            // 모든 결과 처리 완료 시
+            // 게임 종료 여부 판단
             if (game.isGameOver()) {
                 String winnerName = game.getWinner().getName();
                 view.showWinnerDialog(winnerName);

@@ -13,15 +13,17 @@ public class MoveActionService {
         this.ruleEngine = ruleEngine;
     }
 
-    /** 단일 Piece 이동 메서드 */
+    /**
+     * 단일 Piece 이동 메서드
+     */
     public void movePiece(Piece piece, ThrowResult throwResult, Game game) {
         // piece가 그룹으로 묶여 있는지 확인
         PieceGroup group = piece.getGroup();
 
-        if(group != null && group.size() > 1){
+        if (group != null && group.size() > 1) {
             // 이미 그룹 상태면 그룹 전체를 이동
             movePiece(group, throwResult, game);
-        }else{
+        } else {
             // 그룹에 속해있지 않다면
             PieceGroup singleGroup = new PieceGroup(piece.getOwner()); // 크기 1 그룹을 임시로 만들어 처리
             singleGroup.grouping(piece);
@@ -38,16 +40,10 @@ public class MoveActionService {
         // 전진/후진에 따라 target Cell 결정
         Cell target;
         if (throwResult == ThrowResult.BACK_DO) { // 뒤로 한 칸 이동한 타겟 셀 계산
-            if (currPlayer.checkAllPiecesNotStarted()) {
-
-            }
             target = group.backToPrevious();
         } else {
             target = moveForward(group, start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
         }
-
-        // 그룹 이동
-        group.moveGroupTo(target);
 
         // 룰 적용
         applyRules(group, target, game);
@@ -58,26 +54,43 @@ public class MoveActionService {
 //        }
     }
 
-    /** steps만큼 순방향 이동 후 도착 cell 반환 */
+    /**
+     * steps만큼 순방향 이동 후 도착 cell 반환
+     */
     private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
+
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
+
             Cell next;
-            if(i == 0 && nextList.size()  == 2){
+            if (i == 0 && nextList.size() >= 2) {
                 // 첫 시작 Cell이 분기점(즉, 다음 셀이 2개 이상)이면
                 next = nextList.get(1); // 대각길(지름길/인덱스 1) 경로로 들어가고
-            } else{
+            } else {
                 next = nextList.get(0); // 그 외는 항상 인덱스 0 따라감
             }
+
+            // Piece들 상태 갱신 & 탈출 체크
+            int remainingSteps = steps - (i + 1);
+            boolean finished = updatePiecesState(group, current, remainingSteps);
+
+            // 한 칸 이동
             group.moveGroupTo(next);
-            updatePiecesState(group, next); // Piece들 상태 갱신
+
             current = next;
+
+            // 탈출한 말은 이동 더 이상 이동할 필요 없으니 종료
+            if (finished) {
+                break;
+            }
         }
         return current;
     }
 
-    /** 이동 후 적용할 룰들을 분리된 메서드로 구현합니다. */
+    /**
+     * 이동 후 적용할 룰들을 분리된 메서드로 구현합니다.
+     */
     private void applyRules(PieceGroup movingGroup, Cell cell, Game game) {
         // 말 업기
 
@@ -109,21 +122,27 @@ public class MoveActionService {
         }
     }
 
-    private void updatePiecesState(PieceGroup group, Cell start){
-        if(start.isStartCell() && group.getPath().size()>1){
+    private boolean updatePiecesState(PieceGroup group, Cell currCell, int remainingSteps) {
+        // 이동할 칸이 남아 있고 && 지금 위치가 출발점이라면 탈출
+        if (remainingSteps > 0 && currCell.isStartCell() && group.getPath().size() > 1) {
+            // FINISHED 상태로 변경
             group.setPiecesState(PieceState.FINISHED);
-            group.breakUp();
-            for(Piece occupant : start.getOccupants()){
-                // 출발점에 있는 말들 중에 종료 상태인 말들을 출발점에서 제거
-                if(occupant.getState() == PieceState.FINISHED){
-                    start.removePiece(occupant);
+            group.breakUp(); // 그룹 해체
+
+            // START 셀 위의 FINISHED 피스를 일괄 제거
+            List<Piece> toRemove = new ArrayList<>();
+            for (Piece occupant : currCell.getOccupants()) {
+                if (occupant.getState() == PieceState.FINISHED) {
+                    toRemove.add(occupant);
                 }
             }
-            Player currPlayer = group.getOwner();
-            currPlayer.checkAllPiecesFinished(); // 모든 말을 내보냈다면 플레이어 상태를 FINISHED로 갱신
+            for (Piece p : toRemove) {
+                currCell.removePiece(p);
+            }
+            return true;
         }
-        else{
-            group.setPiecesState(PieceState.ON_BOARD);
-        }
+        // 아직 탈출되지 않았다면 ON_BOARD 상태로 설정
+        group.setPiecesState(PieceState.ON_BOARD);
+        return false;
     }
 }
