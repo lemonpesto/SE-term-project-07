@@ -81,7 +81,7 @@ public class Game {
         moveActionService.movePiece(chosenPiece, throwResult, this);
 
         // 2) 해당 플레이어가 말 전부를 FINISHED 상태로 보냈다면 finishedPlayers에 추가
-        if (player.hasAllPiecesFinished() && !finishedPlayers.contains(player)) {
+        if (player.getIsFinished() && !finishedPlayers.contains(player)) {
             finishedPlayers.add(player);
         }
 
@@ -110,7 +110,7 @@ public class Game {
         }
 
         // 2) 해당 플레이어가 말 전부를 FINISHED 상태로 보냈으면 finishedPlayers에 추가
-        if (player.hasAllPiecesFinished() && !finishedPlayers.contains(player)) {
+        if (player.getIsFinished() && !finishedPlayers.contains(player)) {
             finishedPlayers.add(player);
         }
 
@@ -130,7 +130,7 @@ public class Game {
         int n = players.size();
         do {
             currentPlayerIndex = (currentPlayerIndex + 1) % n;
-        } while (players.get(currentPlayerIndex).hasAllPiecesFinished());
+        } while (players.get(currentPlayerIndex).getIsFinished());
 
         // 결과: new currentPlayerIndex에 해당하는 플레이어가 차례가 됨.
     }

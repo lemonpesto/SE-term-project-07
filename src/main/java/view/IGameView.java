@@ -17,8 +17,11 @@ public interface IGameView {
     // 상태 메시지를 화면 하단의 상태 표시줄에 보여달라고 요청
     void updateStatus(String message);
 
-    // 말 선택 가능 여부를 View에 알림 (ExtraTurn이 false일 때는 말 선택이 불가능하도록)
+    // 말 선택 기능을 활성화/비활성화 함 (ExtraTurn이 false일 때는 말 선택이 불가능하도록)
     void setPieceSelectable(boolean enabled);
+
+    // 윷 던지기 버튼을 활성화/비활성화 함
+    void setThrowEnabled(boolean enabled);
 
     // 게임이 끝나서 순위가 결정되었을 때 팝업창 띄워 달라고 요청
     void showWinnerDialog(String winnerName); // !! winner가 아니라 등수로 보여지도록 수정 !!

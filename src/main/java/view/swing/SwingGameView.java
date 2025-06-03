@@ -24,7 +24,7 @@ import java.awt.event.MouseEvent;
 public class SwingGameView extends JPanel implements IGameView {
 
     private final GameBoardPanel boardPanel;   // 실제 보드판과 말(Occupant/Off-board)을 그리는 패널
-    private final JButton btnThrow;            // “윷 던지기” 버튼
+    private final JButton throwButton;            // “윷 던지기” 버튼
     private final JLabel statusLabel;          // 상태 메시지 표시용 라벨
 
     // 게임 로직을 처리할 컨트롤러를 참조하기 위한 리스너
@@ -58,18 +58,18 @@ public class SwingGameView extends JPanel implements IGameView {
         // 2) 하단(또는 우측)에 “상태 + 버튼” 패널
         JPanel controlPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
         statusLabel = new JLabel("게임 준비 중...");
-        btnThrow = new JButton("윷 던지기");
+        throwButton = new JButton("윷 던지기");
 
         // 초기 상태: “윷 던지기”만 활성화, 말 선택은 비활성
-        btnThrow.setEnabled(true);
+        throwButton.setEnabled(true);
         pieceSelectable = false;
 
         controlPane.add(statusLabel);
-        controlPane.add(btnThrow);
+        controlPane.add(throwButton);
         add(controlPane, BorderLayout.SOUTH);
 
         // 3) 버튼 클릭 시 컨트롤러(onThrowButtonClicked) 호출
-        btnThrow.addActionListener(e -> {
+        throwButton.addActionListener(e -> {
             if (listener != null) {
                 listener.onThrowButtonClicked();
             }
@@ -118,5 +118,10 @@ public class SwingGameView extends JPanel implements IGameView {
     public void setPieceSelectable(boolean enabled) {
         this.pieceSelectable = enabled;
         // 시각적 표시를 원하면 boardPanel.repaint()를 호출해도 좋습니다.
+    }
+
+    @Override
+    public void setThrowEnabled(boolean enabled){
+        throwButton.setEnabled(enabled);
     }
 }

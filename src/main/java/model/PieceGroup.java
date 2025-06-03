@@ -20,6 +20,10 @@ public class PieceGroup {
         return pieces;
     }
 
+    public List<Cell> getPath() {
+        return path;
+    }
+
     // 그룹 소유자 플레이어 반환
     public Player getOwner() {
         return owner;
@@ -42,6 +46,12 @@ public class PieceGroup {
     // 새로 병합된 말의 path로 갱신
     private void setGroupPath(Piece newPiece) {
         path = newPiece.getPath();
+    }
+
+    public void setPiecesState(PieceState state) {
+        for(Piece p : pieces){
+            p.setState(state);
+        }
     }
 
     // --- Helper --- //
@@ -69,13 +79,14 @@ public class PieceGroup {
     }
 
     // 그룹에 있는 모든 말들을 dest Cell로 이동
-    public void moveGroupTo(Cell dest) {
+    public void moveGroupTo(Cell nextCell) {
         if (pieces.isEmpty()) {
             return;
         }
         // 그룹에 있는 모든 말들을 dest Cell로 이동
         for (Piece piece : pieces) {
-            piece.moveTo(dest);
+            piece.moveTo(nextCell);
+            setGroupPath(piece);
         }
     }
 
@@ -83,12 +94,26 @@ public class PieceGroup {
         if (path.size() < 2) {
             throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
         }
-        // 마지막 기록 제거
-        path.remove(path.size() - 1);
+        if(path.size() > 2){
+            // 마지막 기록 제거
+            path.remove(path.size() - 1);
+        } // else: path가 startCell, 첫 번째 cell인 경우는 첫 번째 cell을 삭제하지 않음
+
         // 이전 셀
         Cell prev = path.get(path.size() - 1);
         // 실제 위치 업데이트
         moveGroupTo(prev);
         return getCurrentCell();
     }
+
+//
+//    public void handleFinished(Cell start){
+//        if(start.isStartCell()){
+//
+//        }
+//        for (Piece piece : pieces) {
+//            piece.moveTo(nextCell);
+//            setGroupPath(piece);
+//        }
+//    }
 }

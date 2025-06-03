@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+import static model.PieceState.NOT_STARTED;
+
 // 윷판을 그릴 패널
 
 public class GameBoardPanel extends JPanel {
@@ -48,7 +50,8 @@ public class GameBoardPanel extends JPanel {
         int sides = board.getShape().getVertexCount();
         int cellsPerEdge = board.getCellsPerEdge();
 
-        // [1] 꼭짓점 cell 좌표 계산
+        // --- 좌표 계산 --- //
+        // 1) 꼭짓점 cell 좌표 계산
         Point[] vertexPoints = new Point[sides];
         Point[][] edgePoints = new Point[sides][cellsPerEdge];
         for (int i = 0; i < sides; i++) {
@@ -58,7 +61,7 @@ public class GameBoardPanel extends JPanel {
             vertexPoints[i] = new Point(x, y);
         }
 
-        // [2] edge cell 좌표 계산
+        // 2) edge cell 좌표 계산
         for (int i = 0; i < sides; i++) {
             Point from = vertexPoints[i];
             Point to = vertexPoints[(i + 1) % sides];
@@ -70,10 +73,10 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
-        // [3] 중앙 cell 좌표
+        // 3) 중앙 cell 좌표
         Point centerPoint = new Point(CENTER, CENTER);
 
-        // [4] 대각 cell 좌표
+        // 4) 대각 cell 좌표
         // D0, D(n-1)은 중앙-->꼭짓점 방향, D1~D(n-2)는 꼭짓점-->중앙 방향
         java.util.function.Function<String, Point> getPosition = (id) -> {
             if (id.startsWith("V")) {
@@ -113,7 +116,7 @@ public class GameBoardPanel extends JPanel {
             return new Point(0, 0); // 혹시나 예외
         };
 
-        // [3] 모든 셀 연결선 그리기
+        // --- 모든 셀 연결선 그리기 --- //
         g.setColor(Color.LIGHT_GRAY);
         for (Cell cell : board.getAllCells()) {
             Point from = getPosition.apply(cell.getId());
@@ -123,12 +126,13 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
-        // [4] 모든 셀을 type별로 그리기
+        // --- 모든 셀을 type별로 그리기 --- //
         for (Cell cell : board.getAllCells()) {
             Point p = getPosition.apply(cell.getId());
 
             // 테두리 지정 및 색상 채우기
-            if (cell.getId().startsWith("V") || cell.getId().equals("C")) { // 특수 cell: 이중 테두리, 빨강
+            if (cell.getId().startsWith("V") || cell.getId().equals("C")) {
+                // 1) 특수 cell: 이중 테두리, 빨강
                 // 바깥쪽 테두리
                 g.setColor(Color.BLACK); // 예시
                 g.drawOval(p.x - NODE_SIZE / 2 - 5, p.y - NODE_SIZE / 2 - 5, NODE_SIZE + 10, NODE_SIZE + 10);
@@ -146,7 +150,8 @@ public class GameBoardPanel extends JPanel {
                     g.setColor(Color.BLACK);
                     g.drawString("START", p.x - 20, p.y + 6);
                 }
-            } else { // edge cell: 단일 테두리, 하양
+            } else {
+                // 2) edge cell: 단일 테두리, 하양
                 // 테두리
                 g.setColor(Color.BLACK);
                 g.drawOval(p.x - NODE_SIZE / 2, p.y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE);
@@ -155,13 +160,9 @@ public class GameBoardPanel extends JPanel {
                 g.setColor(Color.WHITE);
                 g.fillOval(p.x - NODE_SIZE / 2, p.y - NODE_SIZE / 2, NODE_SIZE, NODE_SIZE);
             }
-
-            // 셀 id 출력
-//            g.setColor(Color.BLACK);
-//            g.drawString(cell.getId(), p.x - 12, p.y + 6);
         }
 
-        // [7] Cell 위 Occupant(말) 그리기
+        // [7] On-board 말(Occupant) 그리기
         for (Cell cell : board.getAllCells()) {
             Point cellCenter = getPosition.apply(cell.getId());
             List<Piece> occupants = cell.getOccupants();
@@ -170,6 +171,8 @@ public class GameBoardPanel extends JPanel {
             int count = occupants.size();
             for (int i = 0; i < count; i++) {
                 Piece piece = occupants.get(i);
+                if(cell.isStartCell() && piece.getState() == NOT_STARTED) continue;
+
                 // 같은 Cell에 여러 말이 겹치지 않도록 사분면 식으로 배치
                 int offsetX = ((i % 2) == 0) ? -PIECE_RADIUS : PIECE_RADIUS;
                 int offsetY = ((i < 2) ? -PIECE_RADIUS : PIECE_RADIUS);
@@ -194,15 +197,16 @@ public class GameBoardPanel extends JPanel {
 
         // [8] Off-board 말 그리기: “사분면 고정 위치”에 플레이어별로 모아서 배치
         List<Player> players = game.getPlayers();
-        int nPlayers = players.size();
+        int numPlayers = players.size();
 
-        for (int idx = 0; idx < nPlayers; idx++) {
+        for (int idx = 0; idx < numPlayers; idx++) {
             Player player = players.get(idx);
             // “idx”가 가리키는 사분면 계산
+
             //  2명 --> idx=0-->Ⅱ, idx=1-->Ⅳ
             //  3명 --> idx=0-->Ⅱ, idx=1-->Ⅰ, idx=2-->Ⅳ
             //  4명 --> idx=0-->Ⅱ, idx=1-->Ⅰ, idx=2-->Ⅳ, idx=3-->Ⅲ
-            Point quadCenter = computeQuadrantPoint(idx, nPlayers);
+            Point quadCenter = computeQuadrantPoint(idx, numPlayers);
 
             // “플레이어 이름”을 사분면의 중앙(조금 위) 에 그린다.
             String playerName = player.getName();
@@ -218,7 +222,7 @@ public class GameBoardPanel extends JPanel {
             List<Piece> pieces = player.getPieces();
             int drawnCount = 0;
             for (Piece piece : pieces) {
-                if (piece.getState() == PieceState.NOT_STARTED) {
+                if (piece.getState() == NOT_STARTED) {
                     // idx번째 사분면의 quadCenter 근처에 뜨는 말 위치 계산
                     // 4개일 때는 quadCenter 주변에 2x2 격자로 배치
                     int col = drawnCount % 2;       // 0 또는 1

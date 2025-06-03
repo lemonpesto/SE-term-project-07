@@ -47,6 +47,9 @@ public class Piece {
     public void setState(PieceState state) {
         this.state = state;
     }
+    public void setPosition(Cell position){
+        this.position = position;
+    }
 
     // --- Helper --- //
 
@@ -57,10 +60,10 @@ public class Piece {
 
     // 말을 dest칸으로 옮김
     public void moveTo(Cell dest) {
-        this.position.removePiece(this);    // 현재 칸에서 말 제거 (removePiece() : Cell 클래스에서 해당 Cell에 있는 말을 없애는 메소드를 의미)
+        position.removePiece(this);    // 현재 칸에서 말 제거 (removePiece() : Cell 클래스에서 해당 Cell에 있는 말을 없애는 메소드를 의미)
         dest.addPiece(this);                // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
-        this.position = dest;               // 말의 위치를 dest Cell로 변경
-        this.path.add(dest);                // 경로 기록
+        position = dest;               // 말의 위치를 dest Cell로 변경
+        path.add(dest);                // 경로 기록
         if(dest.isStartCell() && state == PieceState.NOT_STARTED){ // 말 잡힌 경우
             path.clear();
             path.add(dest);

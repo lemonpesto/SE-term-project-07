@@ -4,6 +4,7 @@ import model.Game;
 import model.Piece;
 import model.Player;
 import model.ThrowResult;
+
 import view.IGameViewListener;
 import view.IGameView;
 
@@ -42,12 +43,12 @@ public class GameController implements IGameViewListener {
         // 게임 상태를 IN_PROGRESS로 전환
         game.startGame();
 
-        // 뷰를 초기화하고, 뷰에 이 컨트롤러를 이벤트 리스너로 등록
-        view.setGameViewListener(this);
+        // 뷰에 이 컨트롤러를 이벤트 리스너로 등록
+        this.view.setGameViewListener(this);
 
         // 초기 화면 상태: 첫 플레이어가 윷 던지기
-        Player currPlayer = game.getCurrentPlayer();
-        view.updateStatus(currPlayer.getName() + "님, 윷을 던져주세요.");
+        Player firstPlayer = game.getCurrentPlayer();
+        view.updateStatus(firstPlayer.getName() + "님, 윷을 던져주세요.");
 
         // 초기 클릭 상태: “말 선택”은 비활성화
         view.setPieceSelectable(false);
@@ -67,22 +68,34 @@ public class GameController implements IGameViewListener {
         ThrowResult throwResult = game.getThrowService().throwRandom();
         throwResults.add(throwResult);
 
-        // 2) 상태 메시지 업데이트
-        view.updateStatus(currPlayer.getName() + "님, 윷 결과: " + throwResult.name() + " 입니다.");
-
-        // 3) extraTurn 여부에 따라 윷 연속으로 던질지 결정
+        // 2) extraTurn 여부에 따라 윷 던지기 계속할지 결정
         if (throwResult.isExtraTurn()) {
-            // extraTurn == true --> 윷 더 던지기
-            view.setPieceSelectable(false);
-            view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + "한 번 더 던져주세요!");
+            // extraTurn == true(윷/모) --> 윷 더 던지기
+            view.setThrowEnabled(true);     // 윷 던지기 버튼 활성화
+            view.setPieceSelectable(false); // 아직 말 선택 X
+            view.updateStatus(currPlayer.getName() + "님, 윷 결과: " + throwResult.name() + " 입니다. 한 번 더 던져주세요!");
         } else {
-            // extraTurn == false --> 윷 던지기 종료, 말 이동 단계로 전환
+            // extraTurn == false --> 윷 던지기 종료, 말 선택 및 이동 단계로 전환
             isProcessingThrows = true;
             currThrowIndex = 0;
-
-            // 말 선택 활성화
-            view.setPieceSelectable(true);
-            view.updateStatus(currPlayer.getName() + "님, " + throwResults.get(0).name() + "를 적용시킬 말을 클릭하세요.");
+            view.setThrowEnabled(false);    // 윷 던지기 멈추고
+            view.setPieceSelectable(true);  // 말 선택
+            // 윷 던지기 결과 개수에 따른 상태 메시지 결정
+            if(throwResults.size() == 1) {
+                // 윷 한 번 던진 경우
+                if(throwResult == ThrowResult.BACK_DO && currPlayer.checkAllPiecesNotStarted()){
+                    // 이동 가능한 말이 없다면 다음 턴
+                    view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + " 입니다. 이동시킬 말이 없습니다.");
+                    nextTurn();
+                }else{
+                    view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + " 입니다. 이동시킬 말을 클릭하세요.");
+                }
+            }
+            else{
+                // 윷 여러 번 던진 경우
+                view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResults.get(throwResults.size() - 1).name() + " 입니다." // 현재 결과
+                        + "\n첫 번째 결과: " + throwResults.get(0).name() + " 를 적용시킬 말을 클릭하세요."); // 첫 번째 결과
+            }
         }
     }
 
@@ -97,28 +110,23 @@ public class GameController implements IGameViewListener {
         }
 
         Player currPlayer = game.getCurrentPlayer(); // 현재 차례 플레이어
-        ThrowResult throwResult = throwResults.get(currThrowIndex); // 현재 처리할 ThrowResult
+        ThrowResult throwResult = throwResults.get(currThrowIndex++); // 현재 처리할 ThrowResult
 
-        // 말 이동/룰 적용/종료 체크
+        // 윷 결과들 말에 적용 (이동/룰 적용/종료 체크)
         game.playTurn(currPlayer, throwResult, piece);
-        // 화면 업데이트
-        view.updateBoard();
-        // 다음에 처리할 ThrowResult로 인덱스 없데이트
-        currThrowIndex++;
+        view.updateBoard(); // 화면 업데이트
 
         // 다음 ThrowResult가 남아 있는지 확인
         if(currThrowIndex < throwResults.size()) {
             // 남은 결과 있으면
             ThrowResult nextThrowResult = throwResults.get(currThrowIndex);
-            view.updateStatus(currPlayer.getName() + "님, 다음 결과: " + nextThrowResult.name() + "를 적용시킬 말을 클릭하세요.");
+            view.updateStatus(currPlayer.getName() + "님, 다음 결과: " + nextThrowResult.name() + " 를 적용시킬 말을 클릭하세요.");
 
             // 말 선택 계속 활성화
             view.setPieceSelectable(true);
+            view.setThrowEnabled(false);
         } else{
             // 모든 ThrowResult 처리 완료했다면
-            isProcessingThrows = false;
-            throwResults.clear();   // 윷 던지기 결과 리스트 초기화
-            currThrowIndex = 0;     // 인덱스 리셋
 
             // 게임 종료 여부 확인
             if (game.isGameOver()) {
@@ -126,12 +134,15 @@ public class GameController implements IGameViewListener {
                 view.showWinnerDialog(winnerName);
                 return;
             }
+            nextTurn();
         }
-        nextTurn();
     }
 
-    // 턴 종료 시 호출
-    private void nextTurn() {
+    private void nextTurn(){
+        isProcessingThrows = false;
+        throwResults.clear();   // 윷 던지기 결과 리스트 초기화
+        currThrowIndex = 0;     // 인덱스 리셋
+
         // 다음 플레이어로 차례 넘기기
         game.advanceTurn();
         Player nextPlayer = game.getCurrentPlayer();
@@ -139,6 +150,6 @@ public class GameController implements IGameViewListener {
         view.updateStatus(nextPlayer.getName() + "님, 윷을 던져주세요.");
         // 말 선택 비활성화
         view.setPieceSelectable(false);
+        view.setThrowEnabled(true);
     }
-
 }
