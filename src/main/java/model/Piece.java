@@ -50,6 +50,9 @@ public class Piece {
     public void setPosition(Cell position){
         this.position = position;
     }
+    public void setPath(List<Cell> path){
+        this.path = path;
+    }
 
     // --- Helper --- //
 

@@ -50,7 +50,7 @@ public class GameBoardPanel extends Pane {
     private static final double OFFBOARD_GAP = 4.0;
     // ────────────────────────────────────────────────────────────────────────────
 
-    public GameBoardPanel(Game game) {
+    public GameBoardPanel(Board board, Game game) {
         this.game = game;
         this.board = game.getBoard();
 

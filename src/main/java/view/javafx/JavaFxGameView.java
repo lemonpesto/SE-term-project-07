@@ -1,108 +1,190 @@
 package view.javafx;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import model.Game;
+import model.Player;
+import model.ThrowResult;
 import model.Piece;
 import view.IGameView;
 import view.IGameViewListener;
 
+import java.util.List;
+
 /**
  * JavaFXGameView
  *
- * – IGameView 인터페이스를 구현한 JavaFX 버전 게임 화면입니다.
- * – showWindow() 호출 시, 새로운 Stage를 생성하여
- *   • 중앙에는 GameBoardPanel(보드판)을,
- *   • 하단에는 상태 레이블 + “윷 던지기” 버튼을 배치합니다.
- * – GameController는 외부에서 생성해 setGameViewListener(...)로 전달합니다.
+ * IGameView 인터페이스를 구현한 JavaFX 버전 게임 화면
+ * MVC 패턴을 준수하여 View와 Controller를 분리
  */
 public class JavaFXGameView implements IGameView {
+
+    private final Stage stage;
     private final Game game;
-    private IGameViewListener listener;
+    private GameBoardPanel gameBoardPanel;
+
     private Label statusLabel;
-    private Button btnThrow;
-    private Stage stage;
+    private Button randomThrowButton;
+    private Button fixedThrowButton;
+    private ComboBox<ThrowResult> fixedThrowCombo;
 
-    // 보드판 전용 패널 (분리된 컴포넌트)
-    private GameBoardPanel boardPanel;
+    private IGameViewListener listener;
+    private boolean pieceSelectable = false;
 
-    public JavaFXGameView(Game game) {
+    /**
+     * 생성자: 외부에서 Stage를 전달받아 사용할 때
+     */
+    public JavaFXGameView(Stage primaryStage, Game game) {
+        this.stage = primaryStage;
         this.game = game;
+        this.gameBoardPanel = new GameBoardPanel(game.getBoard(), game);
+        initUI();
     }
 
-    @Override
-    public void showWindow() {
-        // JavaFX Application Thread가 아닐 경우, 다시 스케줄링
-        if (!Platform.isFxApplicationThread()) {
-            Platform.runLater(this::showWindow);
-            return;
-        }
+    /**
+     * 생성자: Stage를 직접 새로 생성하여 사용할 때
+     */
+    public JavaFXGameView(Game game) {
+        this(new Stage(), game);
+    }
 
-        stage = new Stage();
-        stage.setTitle("JavaFX 윷놀이 게임");
+    /**
+     * UI 초기화
+     */
+    private void initUI() {
+        // 최상위 레이아웃
+        BorderPane root = new BorderPane();
+        root.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // (1) GameBoardPanel 생성 및 리스너 연결
-        boardPanel = new GameBoardPanel(game);
-        boardPanel.setGameViewListener(new IGameViewListener() {
+        // 중앙: GameBoardPanel
+        StackPane centerContainer = new StackPane(gameBoardPanel);
+        centerContainer.setPadding(new Insets(10));
+        centerContainer.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+        root.setCenter(centerContainer);
+
+        // 하단: 컨트롤 패널
+        VBox southContainer = createControlPanel();
+        root.setBottom(southContainer);
+
+        // Scene 설정
+        Scene scene = new Scene(root, 600, 700);
+        stage.setTitle("윷놀이 게임 (JavaFX)");
+        stage.setScene(scene);
+
+        // 창 닫기 이벤트 처리
+        stage.setOnCloseRequest(e -> {
+            Platform.exit();
+        });
+
+        setupEventHandlers();
+    }
+
+    /**
+     * 하단 컨트롤 패널 생성
+     */
+    private VBox createControlPanel() {
+        VBox southContainer = new VBox(5);
+        southContainer.setPadding(new Insets(10));
+        southContainer.setAlignment(Pos.CENTER);
+
+        // 버튼 패널
+        HBox buttonPane = new HBox(10);
+        buttonPane.setAlignment(Pos.CENTER);
+
+        // 랜덤 윷 던지기 버튼
+        randomThrowButton = new Button("랜덤 윷 던지기");
+        randomThrowButton.setDisable(false);
+
+        // 지정 윷 던지기 콤보박스와 버튼
+        fixedThrowCombo = new ComboBox<>(FXCollections.observableArrayList(ThrowResult.values()));
+        fixedThrowCombo.setValue(ThrowResult.DO);
+
+        fixedThrowButton = new Button("지정 윷 던지기");
+        fixedThrowButton.setDisable(false);
+
+        buttonPane.getChildren().addAll(
+                randomThrowButton,
+                new Label("지정 결과:"),
+                fixedThrowCombo,
+                fixedThrowButton
+        );
+
+        // 상태 레이블
+        statusLabel = new Label("게임 준비 중...");
+        statusLabel.setMinHeight(30);
+        HBox statusPane = new HBox(statusLabel);
+        statusPane.setAlignment(Pos.CENTER);
+
+        southContainer.getChildren().addAll(buttonPane, statusPane);
+        return southContainer;
+    }
+
+    /**
+     * 이벤트 핸들러 설정
+     */
+    private void setupEventHandlers() {
+        // GameBoardPanel의 말 클릭 처리
+        gameBoardPanel.setGameViewListener(new IGameViewListener() {
             @Override
-            public void onThrowButtonClicked() {
-                // 보드판 클릭 이벤트가 아닌 “윷 던지기” 버튼 클릭용 (사용 안 함)
+            public void onRandomThrowClicked() {
+                // GameBoardPanel에서는 사용하지 않음
+            }
+
+            @Override
+            public void onFixedThrowClicked(ThrowResult tr) {
+                // GameBoardPanel에서는 사용하지 않음
             }
 
             @Override
             public void onPieceClicked(Piece piece) {
-                if (listener != null) {
-                    listener.onPieceClicked(piece);
-                }
+                if (!pieceSelectable || listener == null) return;
+                listener.onPieceClicked(piece);
             }
         });
 
-        // (2) 상태 레이블
-        statusLabel = new Label(game.getCurrentPlayer().getName() + "님, 윷을 던지세요!");
-        statusLabel.setMinHeight(30);
-
-        // (3) “윷 던지기” 버튼
-        btnThrow = new Button("윷 던지기");
-        btnThrow.setMinHeight(30);
-        btnThrow.setOnAction(e -> {
+        // 랜덤 윷 던지기 버튼
+        randomThrowButton.setOnAction(e -> {
             if (listener != null) {
-                listener.onThrowButtonClicked();
+                listener.onRandomThrowClicked();
             }
         });
 
-        // (4) 하단 HBox: 상태 라벨 + 버튼
-        HBox controlBox = new HBox(10, statusLabel, btnThrow);
-        controlBox.setStyle("-fx-padding: 10;");
-        controlBox.setMinHeight(40);
-
-        // (5) 전체 레이아웃: BorderPane
-        BorderPane root = new BorderPane();
-        root.setCenter(boardPanel);
-        root.setBottom(controlBox);
-
-        Scene scene = new Scene(root, 600, 700);
-        stage.setScene(scene);
-        stage.show();
-
-        // (6) 처음 보드판과 상태 초기화
-        updateBoard();
+        // 지정 윷 던지기 버튼
+        fixedThrowButton.setOnAction(e -> {
+            ThrowResult selected = fixedThrowCombo.getValue();
+            if (selected != null && listener != null) {
+                listener.onFixedThrowClicked(selected);
+            }
+        });
     }
 
+    // IGameView 인터페이스 구현
     @Override
     public void setGameViewListener(IGameViewListener listener) {
         this.listener = listener;
     }
 
     @Override
+    public void showWindow() {
+        Platform.runLater(() -> {
+            if (!stage.isShowing()) {
+                stage.show();
+            }
+        });
+    }
+
+    @Override
     public void updateBoard() {
-        // GameBoardPanel.updateBoard()가 JavaFX 스레드인지 검사하여 drawBoard 호출
-        boardPanel.updateBoard();
+        if (gameBoardPanel != null) {
+            gameBoardPanel.updateBoard();
+        }
     }
 
     @Override
@@ -116,17 +198,40 @@ public class JavaFXGameView implements IGameView {
 
     @Override
     public void setPieceSelectable(boolean enabled) {
-        // 시각적 변화가 필요하다면, 여기서 스타일을 바꾸거나
-        // boardPanel 내부에서 클릭 허용/비허용 로직을 추가로 구현할 수 있습니다.
+        this.pieceSelectable = enabled;
     }
 
     @Override
-    public void showWinnerDialog(String winnerName) {
+    public void setThrowEnabled(boolean enabled) {
         Platform.runLater(() -> {
+            if (randomThrowButton != null) {
+                randomThrowButton.setDisable(!enabled);
+            }
+            if (fixedThrowButton != null) {
+                fixedThrowButton.setDisable(!enabled);
+            }
+            if (fixedThrowCombo != null) {
+                fixedThrowCombo.setDisable(!enabled);
+            }
+        });
+    }
+
+    public void showRankingDialog(List<Player> ranking) {
+        Platform.runLater(() -> {
+            // 순위를 문자열로 만들어 줍니다. 예: 1위: Alice\n2위: Bob\n...
+            StringBuilder content = new StringBuilder();
+            for (int i = 0; i < ranking.size(); i++) {
+                Player p = ranking.get(i);
+                content.append((i + 1)).append("위: ").append(p.getName());
+                if (i < ranking.size() - 1) {
+                    content.append("\n");
+                }
+            }
+
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("게임 종료");
-            alert.setHeaderText(null);
-            alert.setContentText(winnerName + "님이 승리하셨습니다!");
+            alert.setTitle("게임 순위");
+            alert.setHeaderText("최종 순위를 알려드립니다");
+            alert.setContentText(content.toString());
             alert.showAndWait();
         });
     }

@@ -10,12 +10,12 @@ import java.util.*;
  * 게임 한 판을 실행하는 클래스
  */
 public class Game {
+    private final Board board;
     private List<Player> players; // 현재 게임에 참여하는 플레이어들
-    private List<Player> finishedPlayers; // 말을 모두 내보내서 윷을 던질 수 없는 플레이어들 (먼저 끝날수록 먼저 추가되므로 순위 파악에 활용 가능)
-    private int currentPlayerIndex; // 지금 차례인 플레이어의 인덱스
+    private List<Player> finishedPlayers; // 말을 모두 내보내서 윷을 던질 수 없는 플레이어들 (순위 파악)
+    private int currentPlayerIndex = 0; // 지금 차례인 플레이어의 인덱스
 
     // 보드 및 서비스
-    private final Board board;
     private final YutThrowService yutThrowService;
     private final MoveActionService moveActionService;
     private final RuleEngine ruleEngine;
@@ -31,16 +31,18 @@ public class Game {
 
     //생성자 : 플레이어/말/보드 모양을 받아와서 해당 게임을 초기화
     public Game(int playersNum, String[] playerNames, int piecesNum, BoardShape boardShape){
-        // 필드 초기화
         this.players = new ArrayList<>();
         this.finishedPlayers = new ArrayList<>();
-        this.currentPlayerIndex = 0;
+
+        // 보드 생성
         this.board = new Board(boardShape);
+
+        // 서비스 초기화
         this.ruleEngine = new RuleEngine();
         this.yutThrowService = new YutThrowService();
         this.moveActionService = new MoveActionService(ruleEngine);
 
-        // 플레이어 리스트 생성 및 말 위치 초기화
+        // 각 플레이어 객체 생성
         for(int i=0; i<playersNum; i++){
             Player p = new Player(i, playerNames[i], piecesNum, board.getStartCell());
             this.players.add(p);
@@ -63,7 +65,7 @@ public class Game {
     }
 
     // 한 플레이어가 한 턴을 실행 (윷을 던지고, 말을 옮김)
-    public void playTurn(Player player, ThrowResult throwResult, Piece chosenPiece) {
+    public void playTurn(Player player, ThrowResult throwResult, Piece selected) {
         if (gameStatus != GameStatus.IN_PROGRESS) {
             return;
         }
@@ -77,48 +79,21 @@ public class Game {
             results.add(result);
         } while (result.isExtraTurn());
 
-        // 1) 던진 윷 결과를 Piece에 전달해서 이동시키고, 룰(잡기/업기)을 적용
-        moveActionService.movePiece(chosenPiece, throwResult, this);
+        // Piece(s) 이동
+        moveActionService.movePiece(selected, throwResult, this);
 
-        // 2) 해당 플레이어가 말 전부를 FINISHED 상태로 보냈다면 finishedPlayers에 추가
+        // 이동 후 해당 플레이어가 모든 피스를 내보냈는지 검사
         if (player.getIsFinished() && !finishedPlayers.contains(player)) {
+            // 아직 기록되지 않은 플레이어라면 finishedPlayers에 추가
             finishedPlayers.add(player);
         }
 
-        // 3) 만약 이 턴에서 마지막 플레이어까지 끝났다면, gameStatus 변경
+        // 만약 이 턴에서 마지막 플레이어까지 끝났다면, gameStatus 변경
         if (isGameOver()) {
             gameStatus = GameStatus.FINISHED;
         }
     }
 
-    /**
-     * 한 턴에 연속으로 던지는 경우 ThrowResult 리스트를 받아서 순차적으로 말 이동을 처리함
-     *
-     * @param player       : 현재 차례인 Player
-     * @param throwResults : 이번 턴에 던진 모든 ThrowResult 목록 (리스트)
-     * @param chosenPiece  : 사용자가 최종적으로 선택한 말(Piece) 하나
-     */
-    public void playOneTurn(Player player, List<ThrowResult> throwResults, Piece chosenPiece) {
-        if (gameStatus != GameStatus.IN_PROGRESS) {
-            return;
-        }
-
-        // 1) 던진 순서대로 이동 처리
-        for (ThrowResult tr : throwResults) {
-            moveActionService.movePiece(chosenPiece, tr, this);
-            // (이동 후 applyRules 내부에서 업기/잡기, 승패판정 등 모두 수행됨)
-        }
-
-        // 2) 해당 플레이어가 말 전부를 FINISHED 상태로 보냈으면 finishedPlayers에 추가
-        if (player.getIsFinished() && !finishedPlayers.contains(player)) {
-            finishedPlayers.add(player);
-        }
-
-        // 3) 게임 종료 여부 판단
-        if (isGameOver()) {
-            gameStatus = GameStatus.FINISHED;
-        }
-    }
 
     /**
      * 다음 턴의 플레이어로 인덱스를 전환함
@@ -159,9 +134,9 @@ public class Game {
         return players.size()==finishedPlayers.size();
     }
 
-    // 1등 플레이어 반환
-    public Player getWinner(){
-        return finishedPlayers.get(0);
+    // 등수(순서대로 finishOrder에 저장된 Player 리스트) 반환
+    public List<Player> getRanking() {
+        return new ArrayList<>(finishedPlayers);
     }
 
     // 플레이어 순위를 알기 위한 getter
@@ -171,10 +146,6 @@ public class Game {
 
     public YutThrowService getThrowService() {
         return yutThrowService;
-    }
-
-    public MoveActionService getMoveService() {
-        return moveActionService;
     }
 
     //board getter
