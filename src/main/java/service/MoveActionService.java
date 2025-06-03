@@ -42,7 +42,13 @@ public class MoveActionService {
             target = group.backToPrevious();
         } else {
             target = moveForward(group, start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
+            System.out.println("전진 이후 경로: ");
+            for(Cell c : group.getPath()){
+                System.out.print(c.getId() + " ");
+            }
+            System.out.println();
         }
+
 
         // 룰 적용
         applyRules(group, target, game);
@@ -58,38 +64,43 @@ public class MoveActionService {
      */
     private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
-        // 출발점에 있으면서 이미 ON_BOARD 상태인 말이 윷을 던졌을 때 --> 탈출 처리
-        if(from.isStartCell() && group.getPieces().get(0).getState() == PieceState.ON_BOARD){
-            // 남은 이동 칸을 1 이상이라 가정하여 탈출 처리
-            updatePiecesState(group, current, 1);
-            return current;
-        }
-
 
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
 
+            // 분기점 처리: 첫 이동(i==0)이고 nextList가 2개 이상일 때 지름길(인덱스1) 선택
             Cell next;
             if (i == 0 && nextList.size() >= 2) {
-                // 첫 시작 Cell이 분기점(즉, 다음 셀이 2개 이상)이면
-                next = nextList.get(1); // 대각길(지름길/인덱스 1) 경로로 들어가고
+                next = nextList.get(1);
             } else {
-                next = nextList.get(0); // 그 외는 항상 인덱스 0 따라감
+                next = nextList.get(0);
             }
 
-            // Piece들 상태 갱신 & 탈출 체크
-            int remainingSteps = steps - (i + 1);
-            boolean finished = updatePiecesState(group, current, remainingSteps);
+            // 이동 후 “현재 셀이 출발점(START)”인지 확인 (남은 칸 수와 상관없이)
+            if (current.isStartCell() && group.getPath().size() > 1) {
+                // FINISHED 처리: 그룹 내 모든 말 상태를 FINISHED로 변경
+                group.setPiecesState(PieceState.FINISHED);
+                group.breakUp();
 
-            // 한 칸 이동
-            group.moveGroupTo(next);
-
-            current = next;
-
-            // 탈출한 말은 이동 더 이상 이동할 필요 없으니 종료
-            if (finished) {
+                // 출발점에 올라간 FINISHED 상태의 말들을 제거
+                List<Piece> toRemove = new ArrayList<>();
+                for (Piece occupant : current.getOccupants()) {
+                    if (occupant.getState() == PieceState.FINISHED) {
+                        toRemove.add(occupant);
+                    }
+                }
+                for (Piece p : toRemove) {
+                    current.removePiece(p);
+                }
+                // 탈출했으므로 더 이상 이동할 필요 없음
                 break;
             }
+            // 한 칸 이동
+            group.moveGroupTo(next);
+            current = next;
+
+            // 탈출하지 않았으면 ON_BOARD 상태 유지
+            group.setPiecesState(PieceState.ON_BOARD);
         }
         return current;
     }
@@ -125,29 +136,5 @@ public class MoveActionService {
                 }
             }
         }
-    }
-
-    private boolean updatePiecesState(PieceGroup group, Cell currCell, int remainingSteps) {
-        // 이동할 칸이 남아 있고 && 지금 위치가 출발점이라면 탈출
-        if (remainingSteps > 0 && currCell.isStartCell() && group.getPath().size() > 1) {
-            // FINISHED 상태로 변경
-            group.setPiecesState(PieceState.FINISHED);
-            group.breakUp(); // 그룹 해체
-
-            // START 셀 위의 FINISHED 피스를 일괄 제거
-            List<Piece> toRemove = new ArrayList<>();
-            for (Piece occupant : currCell.getOccupants()) {
-                if (occupant.getState() == PieceState.FINISHED) {
-                    toRemove.add(occupant);
-                }
-            }
-            for (Piece p : toRemove) {
-                currCell.removePiece(p);
-            }
-            return true;
-        }
-        // 아직 탈출되지 않았다면 ON_BOARD 상태로 설정
-        group.setPiecesState(PieceState.ON_BOARD);
-        return false;
     }
 }

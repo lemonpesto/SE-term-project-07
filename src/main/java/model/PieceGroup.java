@@ -91,11 +91,12 @@ public class PieceGroup {
         // 그룹에 있는 모든 말들을 dest Cell로 이동
         for (Piece piece : pieces) {
             piece.moveTo(nextCell);
-            setGroupPath(piece);
         }
+        setGroupPath(pieces.get(0));
     }
 
     public Cell backToPrevious() {
+        System.out.println("bye");
         if (path.size() < 2) {
             throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
         } else if(path.size() > 2){
@@ -112,6 +113,11 @@ public class PieceGroup {
         else{ // 도 위치(E0_0)에서 빽도 나온 상황
             moveGroupTo(path.get(0));
         }
+        System.out.println("빽도 이후 경로: ");
+        for(Cell c : path){
+            System.out.print(c.getId() + " ");
+        }
+        System.out.println();
         return getCurrentCell();
     }
 
