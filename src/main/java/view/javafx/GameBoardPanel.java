@@ -208,11 +208,12 @@ public class GameBoardPanel extends Pane {
             int count = occupants.size();
             for (int i = 0; i < count; i++) {
                 Piece piece = occupants.get(i);
+
                 double offsetX = (i % 2 == 0) ? -PIECE_RADIUS : PIECE_RADIUS;
                 double offsetY = (i < 2) ? -PIECE_RADIUS : PIECE_RADIUS;
                 double px = cellCenter.getX() + offsetX;
                 double py = cellCenter.getY() + offsetY;
-
+                if (piece.getState() != PieceState.ON_BOARD) continue;
                 // 플레이어별 색 결정
                 javafx.scene.paint.Color pieceColor = getColorForPlayer(piece.getOwner());
                 gc.setFill(pieceColor);

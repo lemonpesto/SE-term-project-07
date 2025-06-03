@@ -31,16 +31,19 @@ public class MoveActionService {
 
     // PieceGroup 전체를 이동시키는 오버로드 메서드: 그룹 이동시킨 후 룰 적용
     public void movePiece(PieceGroup group, ThrowResult throwResult, Game game) {
-        // 현재 그룹이 어떤 Cell 위에 올라가 있는지 조회
-        Cell start = group.getCurrentCell();
-        int steps = throwResult.getSteps();
+        Cell start = group.getCurrentCell(); // 현재 그룹이 올라가 있는 Cell
+        int steps = throwResult.getSteps();     // 이동할 칸 수
+        Player currPlayer = group.getOwner();
 
         // 전진/후진에 따라 target Cell 결정
         Cell target;
         if (throwResult == ThrowResult.BACK_DO) { // 뒤로 한 칸 이동한 타겟 셀 계산
+            if (currPlayer.checkAllPiecesNotStarted()) {
+
+            }
             target = group.backToPrevious();
         } else {
-            target = moveForward(start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
+            target = moveForward(group, start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
         }
 
         // 그룹 이동
@@ -56,7 +59,7 @@ public class MoveActionService {
     }
 
     /** steps만큼 순방향 이동 후 도착 cell 반환 */
-    private Cell moveForward(Cell from, int steps) {
+    private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
@@ -67,6 +70,8 @@ public class MoveActionService {
             } else{
                 next = nextList.get(0); // 그 외는 항상 인덱스 0 따라감
             }
+            group.moveGroupTo(next);
+            updatePiecesState(group, next); // Piece들 상태 갱신
             current = next;
         }
         return current;
@@ -75,6 +80,7 @@ public class MoveActionService {
     /** 이동 후 적용할 룰들을 분리된 메서드로 구현합니다. */
     private void applyRules(PieceGroup movingGroup, Cell cell, Game game) {
         // 말 업기
+
         if (ruleEngine.applyGrouping(cell)) {
             PieceGroup group = new PieceGroup(movingGroup.getOwner());
             for (Piece p : cell.getOccupants()) {
@@ -100,7 +106,24 @@ public class MoveActionService {
                     occupant.moveTo(startCell);
                 }
             }
+        }
+    }
 
+    private void updatePiecesState(PieceGroup group, Cell start){
+        if(start.isStartCell() && group.getPath().size()>1){
+            group.setPiecesState(PieceState.FINISHED);
+            group.breakUp();
+            for(Piece occupant : start.getOccupants()){
+                // 출발점에 있는 말들 중에 종료 상태인 말들을 출발점에서 제거
+                if(occupant.getState() == PieceState.FINISHED){
+                    start.removePiece(occupant);
+                }
+            }
+            Player currPlayer = group.getOwner();
+            currPlayer.checkAllPiecesFinished(); // 모든 말을 내보냈다면 플레이어 상태를 FINISHED로 갱신
+        }
+        else{
+            group.setPiecesState(PieceState.ON_BOARD);
         }
     }
 }

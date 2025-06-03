@@ -18,6 +18,9 @@ public enum ThrowResult {
 
     public int getSteps() { return steps; }
     public boolean isExtraTurn() { return extraTurn; }
+    public boolean isBackdo() {
+        return this == BACK_DO;
+    }
 
     public static ThrowResult fromSteps(int s) {
         for (ThrowResult r : values()) {

@@ -44,15 +44,28 @@ public class Player {
     }
 
     // 플레이어가 모든 말을 내보냈는지 확인하고, 그렇다면 finishFlag를 true로 설정 후 반환
-    public boolean hasAllPiecesFinished() {
+    public boolean checkAllPiecesFinished() {
+        if(isFinished){ // 모든 말을 내보낸 플레이어인 경우 바로 true 반환
+            return true;
+        }
         for(Piece piece : pieces){
             // 플레이어가 가진 말의 상태가 하나라도 FINISHED 상태가 아니라면 isFinished를 false로 설정하고 함수 종료
             if(!(piece.getState() == PieceState.FINISHED)){
-                return this.isFinished = false;
+                return false;
             }
         }
-        // 플레이어가 가진 모든 말의 상태가 FINISHED인 경우 isFinished를 true로 설정
-        return this.isFinished = true;
+        return this.isFinished = true; // 모든 말을 내보냈다면 isFinished를 true로 갱신
     }
 
+
+    // 플레이어의 모든 말이 아직 출발하지 않은 상태라면 true 반환
+    public boolean checkAllPiecesNotStarted(){
+        for(Piece piece : pieces){
+            // 플레이어가 가진 말의 상태가 하나라도 NOT_STARTED 상태가 아니라면 false
+            if(!(piece.getState() == PieceState.NOT_STARTED)){
+                return false;
+            }
+        }
+        return true;
+    }
 }

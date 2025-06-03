@@ -1,5 +1,7 @@
 package controller;
 
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import model.Game;
 import model.Piece;
 import model.Player;
@@ -75,6 +77,16 @@ public class GameController implements IGameViewListener {
             view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + " 한 번 더 던져주세요!");
         } else {
             // extraTurn == false --> 윷 던지기 종료, 말 이동 단계로 전환
+            if(throwResult.isBackdo() && currPlayer.checkAllPiecesNotStarted()) { // 보드판에 말이 나오지 않았는데 윷 던지기 결과가 백도이면 이동할 수 있는 말이 없음
+                view.setPieceSelectable(false);
+                view.updateStatus(currPlayer.getName() + "님, 결과: " + throwResult.name() + "이동 가능한 말이 없습니다. 턴을 넘깁니다.");
+                PauseTransition pause = new PauseTransition(Duration.millis(1000));
+                pause.setOnFinished(evt -> {
+                    nextTurn();
+                });
+                pause.play();
+                return;
+            }
             isProcessingThrows = true;
             currThrowIndex = 0;
 
