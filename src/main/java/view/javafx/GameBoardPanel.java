@@ -48,6 +48,7 @@ public class GameBoardPanel extends Pane {
     private static final double OFFBOARD_RADIUS = RADIUS + 40.0;
     private static final double OFFBOARD_PIECE_RADIUS = 10.0;
     private static final double OFFBOARD_GAP = 4.0;
+    private static final double OVERLAP_GAP = 12.0;
     // ────────────────────────────────────────────────────────────────────────────
 
     public GameBoardPanel(Board board, Game game) {
@@ -199,7 +200,7 @@ public class GameBoardPanel extends Pane {
             }
         }
 
-        // [7] Cell 위 Occupant(말) 그리기 + 클릭 범위 저장
+        // [7] Cell 위 Occupant(말) 그리기 + 클릭 범위 저장 (한 줄 가운데 정렬)
         for (Cell cell : board.getAllCells()) {
             Point2D cellCenter = getPosition.apply(cell.getId());
             List<Piece> occupants = cell.getOccupants();
@@ -209,11 +210,18 @@ public class GameBoardPanel extends Pane {
             for (int i = 0; i < count; i++) {
                 Piece piece = occupants.get(i);
 
-                double offsetX = (i % 2 == 0) ? -PIECE_RADIUS : PIECE_RADIUS;
-                double offsetY = (i < 2) ? -PIECE_RADIUS : PIECE_RADIUS;
-                double px = cellCenter.getX() + offsetX;
-                double py = cellCenter.getY() + offsetY;
+                // 출발점 셀 위에서 아직 시작하지 않은 말은 건너뜀
+                if (cell.isStartCell() && piece.getState() == PieceState.NOT_STARTED) {
+                    continue;
+                }
                 if (piece.getState() != PieceState.ON_BOARD) continue;
+
+                // count개의 피스를 일렬로 그리기(가운데 정렬)
+                double baseOffset = (2 * PIECE_RADIUS - OVERLAP_GAP);
+                double offsetX_double = (i - (count - 1) / 2.0) * baseOffset;
+                double px = cellCenter.getX() + offsetX_double;
+                double py = cellCenter.getY(); // y는 중앙
+
                 // 플레이어별 색 결정
                 javafx.scene.paint.Color pieceColor = getColorForPlayer(piece.getOwner());
                 gc.setFill(pieceColor);
@@ -223,6 +231,7 @@ public class GameBoardPanel extends Pane {
                 gc.strokeOval(px - PIECE_RADIUS, py - PIECE_RADIUS,
                         PIECE_RADIUS * 2, PIECE_RADIUS * 2);
 
+                // 클릭 범위 저장
                 Rectangle2D bounds = new Rectangle2D(
                         px - PIECE_RADIUS, py - PIECE_RADIUS,
                         PIECE_RADIUS * 2, PIECE_RADIUS * 2
@@ -246,31 +255,50 @@ public class GameBoardPanel extends Pane {
                     quadCenter.getY() - OFFBOARD_PIECE_RADIUS * 2 - OFFBOARD_GAP);
 
             // Off-board(아직 시작 안 했거나 잡혀서 돌아온) 말 표시
-            int drawnCount = 0;
-            for (Piece piece : player.getPieces()) {
-                if (piece.getState() == PieceState.NOT_STARTED) {
-                    int col = drawnCount % 2;
-                    int row = drawnCount / 2;
-                    double dx = (col == 0) ? -OFFBOARD_PIECE_RADIUS : OFFBOARD_PIECE_RADIUS;
-                    double dy = (row == 0) ? -OFFBOARD_PIECE_RADIUS : OFFBOARD_PIECE_RADIUS;
-                    double px = quadCenter.getX() + dx;
-                    double py = quadCenter.getY() + dy;
+            // 2) Off‐board(아직 시작 안 했거나 잡힌) 말들을 수집
+            List<Piece> offboardPieces = player.getPieces().stream()
+                    .filter(p -> p.getState() == PieceState.NOT_STARTED)
+                    .toList();
 
-                    javafx.scene.paint.Color pc = getColorForPlayer(player);
-                    gc.setFill(pc);
-                    gc.fillOval(px - OFFBOARD_PIECE_RADIUS, py - OFFBOARD_PIECE_RADIUS,
-                            OFFBOARD_PIECE_RADIUS * 2, OFFBOARD_PIECE_RADIUS * 2);
-                    gc.setStroke(Color.BLACK);
-                    gc.strokeOval(px - OFFBOARD_PIECE_RADIUS, py - OFFBOARD_PIECE_RADIUS,
-                            OFFBOARD_PIECE_RADIUS * 2, OFFBOARD_PIECE_RADIUS * 2);
+            int count = offboardPieces.size();
+            if (count == 0) continue;
 
-                    Rectangle2D bounds = new Rectangle2D(
-                            px - OFFBOARD_PIECE_RADIUS, py - OFFBOARD_PIECE_RADIUS,
-                            OFFBOARD_PIECE_RADIUS * 2, OFFBOARD_PIECE_RADIUS * 2
-                    );
-                    pieceBounds.put(piece, bounds);
-                    drawnCount++;
-                }
+            // 3) 한 줄로 가운데 정렬할 때 사용할 간격 계산
+            double baseOffsetOff = (2 * OFFBOARD_PIECE_RADIUS - OVERLAP_GAP);
+
+            for (int i = 0; i < count; i++) {
+                Piece piece = offboardPieces.get(i);
+
+                // 3‐1) 한 줄로 가운데 정렬: (i - (count-1)/2) * baseOffsetOff
+                double offsetX_double = (i - (count - 1) / 2.0) * baseOffsetOff;
+                double px = quadCenter.getX() + offsetX_double;
+                double py = quadCenter.getY(); // 수직(centerY)는 그대로 유지
+
+                // 3‐2) 말 색상 결정
+                javafx.scene.paint.Color pc = getColorForPlayer(player);
+                gc.setFill(pc);
+                gc.fillOval(
+                        px - OFFBOARD_PIECE_RADIUS,
+                        py - OFFBOARD_PIECE_RADIUS,
+                        OFFBOARD_PIECE_RADIUS * 2,
+                        OFFBOARD_PIECE_RADIUS * 2
+                );
+                gc.setStroke(Color.BLACK);
+                gc.strokeOval(
+                        px - OFFBOARD_PIECE_RADIUS,
+                        py - OFFBOARD_PIECE_RADIUS,
+                        OFFBOARD_PIECE_RADIUS * 2,
+                        OFFBOARD_PIECE_RADIUS * 2
+                );
+
+                // 3‐3) 클릭 영역 저장
+                Rectangle2D bounds = new Rectangle2D(
+                        px - OFFBOARD_PIECE_RADIUS,
+                        py - OFFBOARD_PIECE_RADIUS,
+                        OFFBOARD_PIECE_RADIUS * 2,
+                        OFFBOARD_PIECE_RADIUS * 2
+                );
+                pieceBounds.put(piece, bounds);
             }
         }
     }
