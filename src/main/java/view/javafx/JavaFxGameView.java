@@ -1,5 +1,7 @@
 package view.javafx;
 
+import controller.SetupControllerFX;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -9,14 +11,17 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import model.Game;
 import model.Player;
 import model.ThrowResult;
 import model.Piece;
 import view.IGameView;
 import view.IGameViewListener;
+import view.ISetupViewListener;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * JavaFXGameView
@@ -197,6 +202,15 @@ public class JavaFXGameView implements IGameView {
     }
 
     @Override
+    public void delayNextTurn(Runnable action, int delayMillis) {
+        // JavaFX에서 일정 시간 후 작업을 실행하려면 PauseTransition을 사용합니다.
+        PauseTransition pause = new PauseTransition(Duration.millis(delayMillis));
+        pause.setOnFinished(e -> action.run());
+        pause.play();
+    }
+
+
+    @Override
     public void setPieceSelectable(boolean enabled) {
         this.pieceSelectable = enabled;
     }
@@ -216,23 +230,48 @@ public class JavaFXGameView implements IGameView {
         });
     }
 
+    @Override
     public void showRankingDialog(List<Player> ranking) {
         Platform.runLater(() -> {
-            // 순위를 문자열로 만들어 줍니다. 예: 1위: Alice\n2위: Bob\n...
-            StringBuilder content = new StringBuilder();
+            // 1) 순위 문자열 생성
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < ranking.size(); i++) {
                 Player p = ranking.get(i);
-                content.append((i + 1)).append("위: ").append(p.getName());
-                if (i < ranking.size() - 1) {
-                    content.append("\n");
-                }
+                sb.append((i + 1)).append("등: ").append(p.getName());
+                if (i < ranking.size() - 1) sb.append("\n");
             }
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("게임 순위");
-            alert.setHeaderText("최종 순위를 알려드립니다");
-            alert.setContentText(content.toString());
-            alert.showAndWait();
+            // 2) Alert 창 생성
+            Alert alert = new Alert(Alert.AlertType.NONE);
+            alert.initOwner(stage); // 기존 게임 창의 Stage
+            alert.setTitle("최종 등수");
+            alert.setHeaderText(sb.toString());
+            alert.setContentText("게임을 다시 시작하시겠습니까?");
+
+            // 3) 버튼 추가
+            ButtonType restartBtn = new ButtonType("다시 시작");
+            ButtonType exitBtn    = new ButtonType("종료");
+            alert.getButtonTypes().setAll(restartBtn, exitBtn);
+
+            // 4) 사용자 선택에 따라 동작
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent()) {
+                if (result.get() == restartBtn) {
+                    // 다시 시작 버튼 클릭 시 - 게임 설정 창부터 다시 시작
+                    stage.close(); // 현재 게임 창 닫기
+
+                    // 새로운 게임 설정 창 띄우기 (YutNoriApplication의 start 메소드 호출)
+                    try {
+                        new SetupControllerFX().start(new Stage());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (result.get() == exitBtn) {
+                    // 종료 버튼 클릭 시 - 게임 창 닫기
+                    stage.close();
+                }
+            }
         });
     }
 }

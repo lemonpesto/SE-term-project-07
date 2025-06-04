@@ -160,9 +160,6 @@ public class JavaFXSetupView extends Stage implements ISetupView {
 
         // “게임 시작” 버튼 클릭
         btnStart.setOnAction(e -> {
-            // 디버그 로그 (콘솔에 출력해서 이벤트가 실제로 발생하는지 확인해보세요)
-            System.out.println("[DEBUG] JavaFXSetupView: btnStart 눌림. listener=" + listener);
-
             if (listener != null) {
                 String[] names = nameFields.stream()
                         .map(tf -> tf.getText().trim())
