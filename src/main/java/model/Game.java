@@ -40,7 +40,7 @@ public class Game {
         // 서비스 초기화
         this.ruleEngine = new RuleEngine();
         this.yutThrowService = new YutThrowService();
-        this.moveActionService = new MoveActionService(ruleEngine);
+        this.moveActionService = new MoveActionService(ruleEngine, boardShape);
 
         // 각 플레이어 객체 생성
         for(int i=0; i<playersNum; i++){
