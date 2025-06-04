@@ -33,15 +33,21 @@ public class GameController implements IGameViewListener {
         this.game = game;
         this.view = view;
 
+        // 게임 시작
         game.startGame();
+
+        // 뷰에 리스너 등록
         this.view.setGameViewListener(this);
 
+        // 첫 번째 플레이어 안내
         Player firstPlayer = game.getCurrentPlayer();
         view.updateStatus(firstPlayer.getName() + "님, 윷을 던져주세요.");
 
+        // 말 클릭 비활성화, 윷 던지기 활성화
         view.setPieceSelectable(false);
         view.setThrowEnabled(true);
 
+        // 창 띄우기
         view.showWindow();
     }
 
@@ -49,14 +55,17 @@ public class GameController implements IGameViewListener {
     public void onRandomThrowClicked() {
         Player currPlayer = game.getCurrentPlayer();
 
+        // 랜덤 윷 던지기
         ThrowResult result = game.getThrowService().throwRandom();
         throwResults.add(result);
 
         if (result.isExtraTurn()) {
+            // 추가 던지기
             view.setThrowEnabled(true);
             view.setPieceSelectable(false);
             view.updateStatus(currPlayer.getName() + "님, 결과: " + result.name() + ". 추가 던지기 기회입니다!");
         } else {
+            // 말 선택 단계로 전환
             isProcessingThrows = true;
             currThrowIndex = 0;
             view.setThrowEnabled(false);
@@ -112,36 +121,51 @@ public class GameController implements IGameViewListener {
 
     @Override
     public void onPieceClicked(Piece piece) {
-        if (piece == null || !isProcessingThrows) {
-            return;
-        }
-
         Player currPlayer = game.getCurrentPlayer();
-        // 소유주 검사: 본인 차례에만 본인 소유 말 이동 가능
-        if (!piece.getOwner().equals(currPlayer)) {
-            // 타인의 말 클릭 시 무시
-            return;
-        }
 
+        // 1) 클릭 무시 조건
+        if (!isProcessingThrows || piece == null) return;
+        if (piece.getOwner() != currPlayer) return;  // 다른 사람 말 클릭 방지
+
+        // 2) 현재 처리할 ThrowResult 꺼내서 playTurn 호출
         ThrowResult tr = throwResults.get(currThrowIndex++);
         game.playTurn(currPlayer, tr, piece);
         view.updateBoard();
 
+        // PlayTurn 후 해당 플레이어가 이 이동으로 모든 피스를 다 내보냈는지 검사
+        if (currPlayer.checkAllPiecesFinished()) {
+            isProcessingThrows = false;
+            throwResults.clear();
+            currThrowIndex = 0;
+
+            if (game.isGameOver()) {
+                // 이제 모든 플레이어가 등수 기록 완료 --> 최종 등수 다이얼로그 띄우기
+                view.showRankingDialog(game.getRanking());
+                return;
+            }
+            // 남은 throwResults는 의미가 없으므로 버리고 바로 다음 턴 처리
+            nextTurn();
+            return;
+        }
+
         if (currThrowIndex < throwResults.size()) {
+            // 남은 결과 있으면 --> 말 선택
             ThrowResult next = throwResults.get(currThrowIndex);
             view.updateStatus(currPlayer.getName() + "님, 다음 결과: " + next.name() + " → 이동할 말을 클릭하세요.");
             view.setPieceSelectable(true);
             view.setThrowEnabled(false);
         } else {
+            // 해당 턴의 모든 ThrowResult 처리 완료 시
             if (game.isGameOver()) {
-                List<Player> ranking = game.getRanking();
-                view.showRankingDialog(ranking);
+                // 이제 모든 플레이어가 등수 기록 완료 --> 최종 등수 다이얼로그 띄우기
+                view.showRankingDialog(game.getRanking());
                 return;
             }
             nextTurn();
         }
     }
 
+    // 다음 플레이어로 턴 넘김
     private void nextTurn() {
         isProcessingThrows = false;
         throwResults.clear();

@@ -8,14 +8,14 @@ import java.util.List;
 
 public class MoveActionService {
     private final RuleEngine ruleEngine;
+    private final BoardShape boardShape;
 
-    public MoveActionService(RuleEngine ruleEngine) {
+    public MoveActionService(RuleEngine ruleEngine, BoardShape boardShape) {
         this.ruleEngine = ruleEngine;
+        this.boardShape = boardShape;
     }
 
-    /**
-     * 단일 Piece 이동 메서드
-     */
+    // 단일 Piece 이동 메서드
     public void movePiece(Piece piece, ThrowResult throwResult, Game game) {
         // piece가 그룹으로 묶여 있는지 확인
         PieceGroup group = piece.getGroup();
@@ -36,27 +36,23 @@ public class MoveActionService {
         Cell start = group.getCurrentCell(); // 현재 그룹이 올라가 있는 Cell
         int steps = throwResult.getSteps();     // 이동할 칸 수
 
-        // 전진/후진에 따라 target Cell 결정
+        // 1) 전진/후진에 따라 타겟 Cell로 이동
         Cell target;
         if (throwResult == ThrowResult.BACK_DO) { // 뒤로 한 칸 이동한 타겟 셀 계산
             target = group.backToPrevious();
         } else {
             target = moveForward(group, start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
-            System.out.println("전진 이후 경로: ");
-            for(Cell c : group.getPath()){
-                System.out.print(c.getId() + " ");
-            }
-            System.out.println();
         }
 
-
-        // 룰 적용
+        // 2) 룰 적용
         applyRules(group, target, game);
 
-        // 5) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
-//        if (group.getOwner().hasAllPiecesFinished()) {
-//            game.addFinishedPlayer(group.getOwner());
-//        }
+        // 3) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
+        Player currPlayer = group.getOwner();
+        if (currPlayer.checkAllPiecesFinished() && !game.getFinishedPlayers().contains(currPlayer)) {
+            // 아직 기록되지 않은 플레이어라면 finishedPlayers에 추가
+            game.getFinishedPlayers().add(currPlayer);
+        }
     }
 
     /**
@@ -64,19 +60,27 @@ public class MoveActionService {
      */
     private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
+        Cell prev = null;
 
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
 
-            // 분기점 처리: 첫 이동(i==0)이고 nextList가 2개 이상일 때 지름길(인덱스1) 선택
+            // 다음으로 이동할 Cell 계산
             Cell next;
-            if (i == 0 && nextList.size() >= 2) {
+            if(boardShape == BoardShape.SQUARE && current.isCenter() && prev.getId().equals("D2_1")){
+                // BoardShape이 사각형이면서 현재 셀이 중앙 셀일 때 분기점 예외 처리 (통상적인 윷놀이 규칙대로 돌아가도록)
                 next = nextList.get(1);
             } else {
-                next = nextList.get(0);
+                if (i == 0 && nextList.size() >= 2) {
+                    // 분기점 처리: 첫 이동(i==0)이고 nextList가 2개 이상일 때 지름길(인덱스1) 선택
+                    next = nextList.get(1);
+                } else {
+                    // non-분기점 처리: 우회길(인덱스0) 선택
+                    next = nextList.get(0);
+                }
             }
 
-            // 이동 후 “현재 셀이 출발점(START)”인지 확인 (남은 칸 수와 상관없이)
+            // 이동 전 '현재 셀이 출발점(START)'인지 확인
             if (current.isStartCell() && group.getPath().size() > 1) {
                 // FINISHED 처리: 그룹 내 모든 말 상태를 FINISHED로 변경
                 group.setPiecesState(PieceState.FINISHED);
@@ -95,8 +99,10 @@ public class MoveActionService {
                 // 탈출했으므로 더 이상 이동할 필요 없음
                 break;
             }
+
             // 한 칸 이동
             group.moveGroupTo(next);
+            prev = current;
             current = next;
 
             // 탈출하지 않았으면 ON_BOARD 상태 유지
@@ -125,7 +131,7 @@ public class MoveActionService {
             for (Piece occupant : occupants) {
                 Player owner = occupant.getOwner();
                 if (!owner.equals(movingGroup.getOwner())) {
-                    // 1) 속해 있던 그룹에서 제거
+                    // 속해 있던 그룹에서 제거
                     PieceGroup ownerGroup = occupant.getGroup();
                     if (ownerGroup != null) {
                         ownerGroup.remove(occupant);

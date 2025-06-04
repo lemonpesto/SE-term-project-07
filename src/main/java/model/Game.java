@@ -40,7 +40,7 @@ public class Game {
         // 서비스 초기화
         this.ruleEngine = new RuleEngine();
         this.yutThrowService = new YutThrowService();
-        this.moveActionService = new MoveActionService(ruleEngine);
+        this.moveActionService = new MoveActionService(ruleEngine, boardShape);
 
         // 각 플레이어 객체 생성
         for(int i=0; i<playersNum; i++){
@@ -79,16 +79,10 @@ public class Game {
             results.add(result);
         } while (result.isExtraTurn());
 
-        // Piece(s) 이동
+        // 2) Piece(s) 이동
         moveActionService.movePiece(selected, throwResult, this);
 
-        // 이동 후 해당 플레이어가 모든 피스를 내보냈는지 검사
-        if (player.getIsFinished() && !finishedPlayers.contains(player)) {
-            // 아직 기록되지 않은 플레이어라면 finishedPlayers에 추가
-            finishedPlayers.add(player);
-        }
-
-        // 만약 이 턴에서 마지막 플레이어까지 끝났다면, gameStatus 변경
+        // 3) 이 턴에서 마지막 플레이어까지 끝났다면 gameStatus 변경
         if (isGameOver()) {
             gameStatus = GameStatus.FINISHED;
         }
