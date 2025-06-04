@@ -13,9 +13,7 @@ public class MoveActionService {
         this.ruleEngine = ruleEngine;
     }
 
-    /**
-     * 단일 Piece 이동 메서드
-     */
+    // 단일 Piece 이동 메서드
     public void movePiece(Piece piece, ThrowResult throwResult, Game game) {
         // piece가 그룹으로 묶여 있는지 확인
         PieceGroup group = piece.getGroup();
@@ -36,27 +34,23 @@ public class MoveActionService {
         Cell start = group.getCurrentCell(); // 현재 그룹이 올라가 있는 Cell
         int steps = throwResult.getSteps();     // 이동할 칸 수
 
-        // 전진/후진에 따라 target Cell 결정
+        // 1) 전진/후진에 따라 타겟 Cell로 이동
         Cell target;
         if (throwResult == ThrowResult.BACK_DO) { // 뒤로 한 칸 이동한 타겟 셀 계산
             target = group.backToPrevious();
         } else {
             target = moveForward(group, start, steps); // 앞으로 steps 만큼 이동한 타겟 셀 계산
-            System.out.println("전진 이후 경로: ");
-            for(Cell c : group.getPath()){
-                System.out.print(c.getId() + " ");
-            }
-            System.out.println();
         }
 
-
-        // 룰 적용
+        // 2) 룰 적용
         applyRules(group, target, game);
 
-        // 5) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
-//        if (group.getOwner().hasAllPiecesFinished()) {
-//            game.addFinishedPlayer(group.getOwner());
-//        }
+        // 3) 만약 해당 그룹 소유 플레이어의 모든 말이 Finish 상태라면 순위에 추가
+        Player currPlayer = group.getOwner();
+        if (currPlayer.checkAllPiecesFinished() && !game.getFinishedPlayers().contains(currPlayer)) {
+            // 아직 기록되지 않은 플레이어라면 finishedPlayers에 추가
+            game.getFinishedPlayers().add(currPlayer);
+        }
     }
 
     /**

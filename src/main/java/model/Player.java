@@ -56,8 +56,6 @@ public class Player {
         }
         return this.isFinished = true; // 모든 말을 내보냈다면 isFinished를 true로 갱신
     }
-
-
     // 플레이어의 모든 말이 아직 출발하지 않은 상태라면 true 반환
     public boolean checkAllPiecesNotStarted(){
         for(Piece piece : pieces){

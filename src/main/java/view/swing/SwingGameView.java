@@ -1,6 +1,7 @@
 // src/view/swing/SwingGameView.java
 package view.swing;
 
+import controller.SetupController;
 import model.*;
 import view.IGameView;
 import view.IGameViewListener;
@@ -14,9 +15,8 @@ import java.util.List;
 /**
  * SwingGameView
  *
- * - IGameView 인터페이스를 구현합니다.
- * - GameBoardPanel을 중앙에 배치하여 보드와 말을 그립니다.
- * - 하단에 <랜덤 윷 던지기> / <지정 윷 던지기> 버튼을
+ * -- GameBoardPanel 중앙 배치
+ * -- 하단에 <랜덤 윷 던지기> / <지정 윷 던지기> 버튼을
  *   상태 메시지 위, 가운데 고정으로 배치합니다.
  * - “지정 윷 던지기” 버튼을 누르면
  *   JOptionPane으로 빽도/도/개/걸/윷/모 중 선택하게 한 뒤
@@ -59,9 +59,9 @@ public class SwingGameView extends JPanel implements IGameView {
             }
         });
 
-        // ────────────────────────────────────────────────────────────────────
-        // [2] 하단: 버튼 패널 + 상태 메시지 패널 합친 영역
-        // ────────────────────────────────────────────────────────────────────
+
+        // ---- [2] 하단: 버튼 패널, 상태 메시지 패널 ---- //
+
         JPanel southContainer = new JPanel();
         southContainer.setLayout(new BoxLayout(southContainer, BoxLayout.Y_AXIS));
         add(southContainer, BorderLayout.SOUTH);
@@ -85,9 +85,8 @@ public class SwingGameView extends JPanel implements IGameView {
         statusPane.add(statusLabel);
         southContainer.add(statusPane);
 
-        // ────────────────────────────────────────────────────────────────────
-        // [3] 버튼 동작: 컨트롤러로 이벤트 전달
-        // ────────────────────────────────────────────────────────────────────
+        // ---- [3] 버튼 동작: 컨트롤러로 이벤트 전달 ---- //
+
         randomThrowButton.addActionListener(e -> {
             if (listener != null) {
                 listener.onRandomThrowClicked();
@@ -137,19 +136,41 @@ public class SwingGameView extends JPanel implements IGameView {
 
     @Override
     public void showRankingDialog(List<Player> ranking) {
-        // 여러 명의 등수를 한 번에 보여주는 다이얼로그
-        // 예: “1등: Alice\n2등: Bob\n3등: Charlie\n4등: Dave”
+        // “최종 등수”를 문자열로 만들기
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ranking.size(); i++) {
             Player p = ranking.get(i);
             sb.append((i + 1)).append("등: ").append(p.getName()).append("\n");
         }
-        JOptionPane.showMessageDialog(
+
+        // 옵션 버튼 배열: “다시 시작”, “종료”
+        String[] options = { "다시 시작", "종료" };
+
+        // showOptionDialog를 사용하여 커스텀 버튼 두 개 표시
+        int choice = JOptionPane.showOptionDialog(
                 this,
                 sb.toString(),
                 "최종 등수",
-                JOptionPane.INFORMATION_MESSAGE
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]  // 기본 선택: “다시 시작”
         );
+
+        // choice == 0 → “다시 시작” / choice == 1 → “종료” / 혹은 그 외(-1)도 “종료”로 처리
+        if (choice == 0) {
+            // 1) 현재 게임 창 닫기
+            Window win = SwingUtilities.getWindowAncestor(this);
+            if (win != null) {
+                win.dispose();
+            }
+            // 2) 다시 설정 창을 띄우기 위해 SetupController 새로 생성
+            new SetupController();
+        } else {
+            // “종료” 혹은 창을 닫아도 choice가 -1로 내려올 경우
+            System.exit(0);
+        }
     }
 
 

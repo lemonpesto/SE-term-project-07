@@ -26,17 +26,17 @@ public class SetupController implements ISetupViewListener {
     // 사용자가 <게임 시작> 버튼을 눌렀을 때 호출됨
     @Override
     public void onStartClicked(String[] playerNames, int piecesPerPlayer, BoardShape boardShape) {
-        // 1) Game 모델 객체 생성 및 시작
+        // Game 모델 객체 생성 및 시작
         Game game = new Game(playerNames.length, playerNames, piecesPerPlayer, boardShape);
         game.startGame();
 
-        // 2) 실제 게임 화면(ISetupView) 생성
+        // 실제 게임 화면 생성
         IGameView gameView = new SwingGameView(game);
 
-        // 3) GameController 생성 및 연결
+        // GameController 생성 및 연결
         new GameController(game, gameView);
 
-        // 4) 설정 화면 닫기
+        // 설정 화면 닫기
         view.closeView();
     }
 }

@@ -121,29 +121,35 @@ public class GameController implements IGameViewListener {
 
     @Override
     public void onPieceClicked(Piece piece) {
-        if (piece == null || !isProcessingThrows) {
-            return;
-        }
-
-        // 플레이어 검사: 본인 차례에만 본인 소유 말 이동 가능
         Player currPlayer = game.getCurrentPlayer();
-        if (!piece.getOwner().equals(currPlayer)) {
-            // 타인의 말 클릭 시 무시
-            return;
-        }
 
+        // 1) 클릭 무시 조건
+        if (!isProcessingThrows || piece == null) return;
+        if (piece.getOwner() != currPlayer) return;  // 다른 사람 말 클릭 방지
+
+        // 2) 현재 처리할 ThrowResult 꺼내서 playTurn 호출
         ThrowResult tr = throwResults.get(currThrowIndex++);
         game.playTurn(currPlayer, tr, piece);
         view.updateBoard();
 
-        // “PlayTurn 후 이미 플레이어가 모든 피스를 내보낸 상태”라면
+        // PlayTurn 후 해당 플레이어가 이 이동으로 모든 피스를 다 내보냈는지 검사
         if (currPlayer.checkAllPiecesFinished()) {
+            isProcessingThrows = false;
+            throwResults.clear();
+            currThrowIndex = 0;
+
+            if (game.isGameOver()) {
+                // 이제 모든 플레이어가 등수 기록 완료 --> 최종 등수 다이얼로그 띄우기
+                view.showRankingDialog(game.getRanking());
+                return;
+            }
             // 남은 throwResults는 의미가 없으므로 버리고 바로 다음 턴 처리
             nextTurn();
             return;
         }
 
         if (currThrowIndex < throwResults.size()) {
+            // 남은 결과 있으면 --> 말 선택
             ThrowResult next = throwResults.get(currThrowIndex);
             view.updateStatus(currPlayer.getName() + "님, 다음 결과: " + next.name() + " → 이동할 말을 클릭하세요.");
             view.setPieceSelectable(true);
@@ -152,11 +158,10 @@ public class GameController implements IGameViewListener {
             // 해당 턴의 모든 ThrowResult 처리 완료 시
             if (game.isGameOver()) {
                 // 이제 모든 플레이어가 등수 기록 완료 --> 최종 등수 다이얼로그 띄우기
-                List<Player> ranking = game.getRanking();
-                view.showRankingDialog(ranking);
-            } else {
-                nextTurn();
+                view.showRankingDialog(game.getRanking());
+                return;
             }
+             nextTurn();
         }
     }
 
