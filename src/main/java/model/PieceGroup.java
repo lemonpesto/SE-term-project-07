@@ -96,10 +96,7 @@ public class PieceGroup {
     }
 
     public Cell backToPrevious() {
-        System.out.println("bye");
-        if (path.size() < 2) {
-            throw new IllegalStateException("더 이상 뒤로 돌아갈 수 없습니다."); // 이거 어칼까?
-        } else if(path.size() > 2){
+       if(path.size() > 2){
             // 마지막 기록 제거
             path.removeLast();
             // 돌아갈 이전 Cell

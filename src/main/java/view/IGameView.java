@@ -21,6 +21,9 @@ public interface IGameView {
     // 상태 메시지를 화면 하단의 상태 표시줄에 보여달라고 요청
     void updateStatus(String message);
 
+    // 상태 메시지 보이도록 다음 턴으로 넘기기 전에 시간 추가
+    void delayNextTurn(Runnable action, int delayMillis);
+
     // 말 선택 기능을 활성화/비활성화 함 (ExtraTurn이 false일 때는 말 선택이 불가능하도록)
     void setPieceSelectable(boolean enabled);
 

@@ -56,8 +56,9 @@ public class Player {
         }
         return this.isFinished = true; // 모든 말을 내보냈다면 isFinished를 true로 갱신
     }
+
     // 플레이어의 모든 말이 아직 출발하지 않은 상태라면 true 반환
-    public boolean checkAllPiecesNotStarted(){
+    private boolean checkAllPiecesNotStarted(){
         for(Piece piece : pieces){
             // 플레이어가 가진 말의 상태가 하나라도 NOT_STARTED 상태가 아니라면 false
             if(!(piece.getState() == PieceState.NOT_STARTED)){
@@ -65,5 +66,32 @@ public class Player {
             }
         }
         return true;
+    }
+
+    public boolean hasNoMovablePiece(ThrowResult throwResult){
+        // 1) 보드 위에 있는 말이 없는 경우
+        if(checkAllPiecesNotStarted()){
+            return true;
+        }
+        // 2) 뒤로 이동 가능한 말이 있는지 검사
+        // 보드 위에 있는 피스가 오직 '도 --> 빽도' 경로로 출발점에 도착한 피스밖에 없는 경우만 true
+        if(throwResult == ThrowResult.BACK_DO){
+            for(Piece piece : pieces){
+                if(piece.getState() == PieceState.ON_BOARD){
+                    if(!(piece.getCurrentCell().isStartCell())){
+                        // 보드 위에 있는 피스의 위치가 출발점이 아니라면: 이동 가능
+                        return false;
+                    } else{
+                        // 보드 위에 있는 피스의 위치가 출발점인데, 도--> 빽도 경로로 도착한 피스가 아니라면
+                        if(piece.getPath().size() > 1){
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } else{
+            return false;
+        }
     }
 }

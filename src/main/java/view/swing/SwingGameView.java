@@ -135,6 +135,15 @@ public class SwingGameView extends JPanel implements IGameView {
     }
 
     @Override
+    public void delayNextTurn(Runnable action, int delayMillis) {
+        Timer timer = new Timer(delayMillis, e -> {
+            action.run();
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    @Override
     public void showRankingDialog(List<Player> ranking) {
         // “최종 등수”를 문자열로 만들기
         StringBuilder sb = new StringBuilder();

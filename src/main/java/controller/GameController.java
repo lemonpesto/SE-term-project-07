@@ -8,6 +8,7 @@ import model.ThrowResult;
 import view.IGameViewListener;
 import view.IGameView;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,9 +73,9 @@ public class GameController implements IGameViewListener {
             view.setPieceSelectable(true);
 
             if (throwResults.size() == 1) {
-                if (result == ThrowResult.BACK_DO && currPlayer.checkAllPiecesNotStarted()) {
+                if (result == ThrowResult.BACK_DO && currPlayer.hasNoMovablePiece(result)) {
                     view.updateStatus(currPlayer.getName() + "님, 결과: " + result.name() + ". 이동할 말이 없습니다.");
-                    nextTurn();
+                    view.delayNextTurn(() -> nextTurn(), 1500);  // 1초 후 nextTurn 실행
                 } else {
                     view.updateStatus(currPlayer.getName() + "님, 결과: " + result.name() + ". 이동할 말을 클릭하세요.");
                 }
@@ -104,9 +105,9 @@ public class GameController implements IGameViewListener {
             view.setPieceSelectable(true);
 
             if (throwResults.size() == 1) {
-                if (fixedResult == ThrowResult.BACK_DO && currPlayer.checkAllPiecesNotStarted()) {
+                if (fixedResult == ThrowResult.BACK_DO && currPlayer.hasNoMovablePiece(fixedResult)) {
                     view.updateStatus(currPlayer.getName() + "님, 결과: " + fixedResult.name() + ". 이동할 말이 없습니다.");
-                    nextTurn();
+                    view.delayNextTurn(() -> nextTurn(), 1500);  // 1초 후 nextTurn 실행
                 } else {
                     view.updateStatus(currPlayer.getName() + "님, 결과: " + fixedResult.name() + ". 이동할 말을 클릭하세요.");
                 }

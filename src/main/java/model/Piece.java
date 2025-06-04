@@ -63,16 +63,13 @@ public class Piece {
 
     // 말을 dest칸으로 옮김
     public void moveTo(Cell dest) {
-        position.removePiece(this);    // 현재 칸에서 말 제거 (removePiece() : Cell 클래스에서 해당 Cell에 있는 말을 없애는 메소드를 의미)
-        dest.addPiece(this);                // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
-        position = dest;               // 말의 위치를 dest Cell로 변경
-        path.add(dest);                // 경로 기록
-        if(dest.isStartCell() && state == PieceState.NOT_STARTED){ // 말 잡힌 경우
+        position.removePiece(this); // 현재 칸에서 말 제거 (removePiece() : Cell 클래스에서 해당 Cell에 있는 말을 없애는 메소드를 의미)
+        dest.addPiece(this);        // 목적지 칸에 추가 (addPiece() : Cell 클래스에서 해당 Cell에 있는 말을 추가하는 메소드를 의미)
+        position = dest; // 말의 위치를 dest Cell로 변경
+        if(dest.isStartCell() && (state == PieceState.NOT_STARTED || path.size() == 2)){ // 말 잡힌 경우 or 도 --> 빽도로 출발점 도착한 경우
             path.clear();
-            path.add(dest);
         }
-        // 말이 한 바퀴를 돌아 시작 Cell에 도착했을 때 말의 상태를 바꾸는 로직을 설계 중이었는데 시작 Cell을 어떻게 인식하느냐...에 대한 문제
-        // 빽도에 의해 다시 시작 Cell로 돌아온 경우는 어떻게 예외 처리를 할 건지...에 대한 고민
+        path.add(dest); // 경로 기록
     }
 
 }

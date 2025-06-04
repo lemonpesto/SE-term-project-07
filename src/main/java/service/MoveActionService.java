@@ -61,16 +61,20 @@ public class MoveActionService {
     private Cell moveForward(PieceGroup group, Cell from, int steps) {
         Cell current = from;
         Cell prev = null;
+        List<Cell> groupPath = group.getPath();
+        if(groupPath.size() >= 2) {
+            prev = groupPath.get(groupPath.size() - 2);
+        }
 
         for (int i = 0; i < steps; i++) {
             List<Cell> nextList = current.getNextCells(); // 현재 셀의 다음 셀 목록
 
             // 다음으로 이동할 Cell 계산
             Cell next;
+            // BoardShape이 사각형이면서 현재 셀이 중앙 셀일 때 분기점 예외 처리 (통상적인 윷놀이 규칙대로 돌아가도록)
             if(boardShape == BoardShape.SQUARE && current.isCenter() && prev.getId().equals("D2_1")){
-                // BoardShape이 사각형이면서 현재 셀이 중앙 셀일 때 분기점 예외 처리 (통상적인 윷놀이 규칙대로 돌아가도록)
                 next = nextList.get(1);
-            } else {
+            } else{
                 if (i == 0 && nextList.size() >= 2) {
                     // 분기점 처리: 첫 이동(i==0)이고 nextList가 2개 이상일 때 지름길(인덱스1) 선택
                     next = nextList.get(1);
@@ -81,7 +85,7 @@ public class MoveActionService {
             }
 
             // 이동 전 '현재 셀이 출발점(START)'인지 확인
-            if (current.isStartCell() && group.getPath().size() > 1) {
+            if (current.isStartCell() && group.getPieces().get(0).getState() == PieceState.ON_BOARD) {
                 // FINISHED 처리: 그룹 내 모든 말 상태를 FINISHED로 변경
                 group.setPiecesState(PieceState.FINISHED);
                 group.breakUp();
@@ -137,7 +141,9 @@ public class MoveActionService {
                         ownerGroup.remove(occupant);
                     }
                     // 상대말: 상태 변경 후 출발 셀로 이동
-                    occupant.setState(PieceState.NOT_STARTED);
+                    if(occupant.getState() == PieceState.ON_BOARD){
+                        occupant.setState(PieceState.NOT_STARTED);
+                    }
                     occupant.moveTo(startCell);
                 }
             }
